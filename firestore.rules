@@ -1,0 +1,271 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (matches Auth UID)
+    // Fields:
+    //   - uid, email, displayName, role (string)
+    //   - xp, level (int)
+    //   - badges (list)
+    //   - enneagramType, moneyStory, bio, currency, incomeRange, primaryGoal, wealthChallenge (string)
+    //   - photoAnalysis (map)
+    //   - createdAt, updatedAt (timestamp)
+    //
+    // Collection: transactions
+    // Document ID: {transactionId}
+    // Fields:
+    //   - userId, date, amount, category, description, type (mixed)
+    //   - createdAt, updatedAt (timestamp)
+    //
+    // Collection: habits
+    // Document ID: {habitId}
+    // Fields:
+    //   - userId, title, description, completedDays (list), streak (number)
+    //   - createdAt, updatedAt (timestamp)
+    //
+    // Collection: goals
+    // Document ID: {goalId}
+    // Fields:
+    //   - userId, title, targetAmount, currentAmount, deadline, category (mixed)
+    //   - obstacles, partners, knowledge, plan, why (string)
+    //   - createdAt, updatedAt (timestamp)
+    //
+    // Collection: gratitude_entries, rituals, money_story_responses
+    // Fields: userId, date/questionId, content/type/answer, createdAt, updatedAt
+    //
+    // Collection: freedom_calculator
+    // Document ID: {userId}
+    // Fields: Full financial plan (maps, lists, numbers)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isDocOwner() {
+      return isAuthenticated() && request.auth.uid == resource.data.userId;
+    }
+
+    function isRecent(ts) {
+      return ts is timestamp &&
+             ts <= request.time + duration.value(10, 'm') &&
+             ts >= request.time - duration.value(10, 'm');
+    }
+
+    function isUnchanged(field) {
+      return field in request.resource.data && 
+             resource != null && 
+             field in resource.data && 
+             request.resource.data[field] == resource.data[field];
+    }
+
+    function isRecentOrUnchanged(field) {
+      return !(field in request.resource.data) || 
+             isRecent(request.resource.data[field]) || 
+             isUnchanged(field);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+             request.resource.data[field].size() >= minLen &&
+             request.resource.data[field].size() <= maxLen;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (
+          (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
+          (request.auth.token.email == "jaco@stockcapital.co.za" && request.auth.token.email_verified == true)
+        );
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function isValidEmail(email) {
+      return email is string &&
+             email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$");
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+
+    function isValidUser(data) {
+      return data.uid == request.auth.uid &&
+             (!('email' in data) || (data.email is string && isValidEmail(data.email))) &&
+             (!('displayName' in data) || (data.displayName is string && data.displayName.size() < 500)) &&
+             (!('enneagramType' in data) || (data.enneagramType is int || data.enneagramType is string)) &&
+             (!('xp' in data) || data.xp is number) &&
+             (!('level' in data) || data.level is number) &&
+             (!('badges' in data) || data.badges is list) &&
+             (!('moneyStory' in data) || (data.moneyStory is string)) &&
+             (!('bio' in data) || (data.bio is string)) &&
+             (!('currency' in data) || (data.currency is string)) &&
+             (!('photoAnalysis' in data) || data.photoAnalysis is map) &&
+             isRecentOrUnchanged('createdAt') &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidTransaction(data) {
+      return data.userId == request.auth.uid &&
+             (!('amount' in data) || data.amount is number) &&
+             (!('type' in data) || data.type in ['income', 'expense']) &&
+             (!('category' in data) || (data.category is string)) &&
+             (!('date' in data) || data.date is string) &&
+             (!('description' in data) || (data.description is string)) &&
+             isRecentOrUnchanged('createdAt') &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidHabit(data) {
+      return data.userId == request.auth.uid &&
+             (!('title' in data) || (data.title is string)) &&
+             (!('description' in data) || (data.description is string)) &&
+             (!('completedDays' in data) || data.completedDays is list) &&
+             (!('streak' in data) || (data.streak is number)) &&
+             isRecentOrUnchanged('createdAt') &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidGoal(data) {
+      return data.userId == request.auth.uid &&
+             (!('title' in data) || (data.title is string)) &&
+             (!('targetAmount' in data) || data.targetAmount is number) &&
+             (!('currentAmount' in data) || data.currentAmount is number) &&
+             (!('deadline' in data) || data.deadline is string) &&
+             (!('category' in data) || data.category in ['1-year', '3-year', '5-year']) &&
+             isRecentOrUnchanged('createdAt') &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidGratitude(data) {
+      return data.userId == request.auth.uid &&
+             (!('date' in data) || data.date is string) &&
+             (!('content' in data) || (data.content is string)) &&
+             isRecentOrUnchanged('createdAt') &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidRitual(data) {
+      return data.userId == request.auth.uid &&
+             (!('date' in data) || data.date is string) &&
+             (!('type' in data) || (data.type is string)) &&
+             isRecentOrUnchanged('createdAt') &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidMoneyStoryResponse(data) {
+      return data.userId == request.auth.uid &&
+             (!('questionId' in data) || data.questionId is int) &&
+             (!('answer' in data) || (data.answer is string)) &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    function isValidFreedomCalculator(data) {
+      return data.userId == request.auth.uid &&
+             (!('currency' in data) || data.currency is string) &&
+             (!('monthlyEarnedIncome' in data) || data.monthlyEarnedIncome is number) &&
+             (!('monthlyPassiveIncome' in data) || data.monthlyPassiveIncome is number) &&
+             (!('monthlyExpenses' in data) || data.monthlyExpenses is number) &&
+             (!('expenseBuffer' in data) || data.expenseBuffer is number) &&
+             (!('assets' in data) || data.assets is map) &&
+             (!('liabilities' in data) || data.liabilities is map) &&
+             (!('inflationRate' in data) || data.inflationRate is number) &&
+             (!('withdrawalRate' in data) || data.withdrawalRate is number) &&
+             (!('monthlyExpensesOverride' in data) || data.monthlyExpensesOverride is number) &&
+             (!('freedomGoals' in data) || data.freedomGoals is list) &&
+             (!('startingCapital' in data) || data.startingCapital is number) &&
+             (!('monthlyInvestment' in data) || data.monthlyInvestment is number) &&
+             (!('annualIncrease' in data) || data.annualIncrease is number) &&
+             (!('targetIrr' in data) || data.targetIrr is number) &&
+             (!('timelineYears' in data) || data.timelineYears is number) &&
+             (!('rhythmStatus' in data) || data.rhythmStatus is map) &&
+             isRecentOrUnchanged('updatedAt');
+    }
+
+    // ===============================================================
+    // Rules
+    // ===============================================================
+
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    match /users/{userId} {
+      allow read: if isOwner(userId) || isAdmin();
+      allow create: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
+      allow update: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+    }
+
+    match /transactions/{transactionId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidTransaction(request.resource.data);
+      allow update: if isDocOwner() && isValidTransaction(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /habits/{habitId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidHabit(request.resource.data);
+      allow update: if isDocOwner() && isValidHabit(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /goals/{goalId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidGoal(request.resource.data);
+      allow update: if isDocOwner() && isValidGoal(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /gratitude_entries/{entryId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidGratitude(request.resource.data);
+      allow update: if isDocOwner() && isValidGratitude(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /rituals/{ritualId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidRitual(request.resource.data);
+      allow update: if isDocOwner() && isValidRitual(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /money_story_responses/{responseId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() && isValidMoneyStoryResponse(request.resource.data);
+      allow update: if isDocOwner() && isValidMoneyStoryResponse(request.resource.data);
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
+    match /freedom_calculator/{calcId} {
+      allow read: if isOwner(calcId) || isAdmin();
+      allow create: if isOwner(calcId) && isValidFreedomCalculator(request.resource.data);
+      allow update: if isOwner(calcId) && isValidFreedomCalculator(request.resource.data);
+      allow delete: if isOwner(calcId) || isAdmin();
+    }
+  }
+}

@@ -1,0 +1,180 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "User's financial profile and mindset data",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string", "description": "Firebase Auth UID" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "enneagramType": { "type": "string", "description": "Wealth Enneagram Type" },
+        "moneyStory": { "type": "string", "description": "User's personal money story" },
+        "xp": { "type": "integer" },
+        "level": { "type": "integer" },
+        "badges": { "type": "array", "items": { "type": "string" } },
+        "currency": { "type": "string" },
+        "bio": { "type": "string" },
+        "incomeRange": { "type": "string" },
+        "primaryGoal": { "type": "string" },
+        "wealthChallenge": { "type": "string" },
+        "photoAnalysis": { "type": "object" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "email"]
+    },
+    "GratitudeEntry": {
+      "title": "Gratitude Entry",
+      "description": "Daily gratitude practice entry",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "content": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "content"]
+    },
+    "RitualEntry": {
+      "title": "Financial Ritual",
+      "description": "Completed financial self-care ritual",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "type": { "type": "string", "description": "Type of ritual (e.g., review, planning, or custom)" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "type"]
+    },
+    "MoneyStoryResponse": {
+      "title": "Money Story Response",
+      "description": "User's response to one of the 8 money story reflection questions",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "questionId": { "type": "integer" },
+        "answer": { "type": "string" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "questionId", "answer"]
+    },
+    "Transaction": {
+      "title": "Financial Transaction",
+      "description": "Income or expense record",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "amount": { "type": "number" },
+        "category": { "type": "string" },
+        "description": { "type": "string" },
+        "type": { "type": "string", "enum": ["income", "expense"] },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "date", "amount", "category", "type"]
+    },
+    "Habit": {
+      "title": "Wealth Habit",
+      "description": "Daily financial habit to track",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "completedDays": { "type": "array", "items": { "type": "string", "format": "date" } },
+        "streak": { "type": "integer" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title"]
+    },
+    "Goal": {
+      "title": "Financial Goal",
+      "description": "Short, medium, or long-term financial target",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "targetAmount": { "type": "number" },
+        "currentAmount": { "type": "number" },
+        "deadline": { "type": "string", "format": "date" },
+        "category": { "type": "string", "enum": ["1-year", "3-year", "5-year"] },
+        "obstacles": { "type": "string" },
+        "partners": { "type": "string" },
+        "knowledge": { "type": "string" },
+        "plan": { "type": "string" },
+        "why": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId", "title", "targetAmount", "currentAmount", "category"]
+    },
+    "FreedomCalculator": {
+      "title": "Freedom Calculator",
+      "description": "User's comprehensive financial freedom plan and progress",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "currency": { "type": "string" },
+        "monthlyEarnedIncome": { "type": "number" },
+        "monthlyPassiveIncome": { "type": "number" },
+        "monthlyExpenses": { "type": "number" },
+        "expenseBuffer": { "type": "number" },
+        "assets": { "type": "object" },
+        "liabilities": { "type": "object" },
+        "inflationRate": { "type": "number" },
+        "withdrawalRate": { "type": "number" },
+        "monthlyExpensesOverride": { "type": "number" },
+        "freedomGoals": { "type": "array" },
+        "startingCapital": { "type": "number" },
+        "monthlyInvestment": { "type": "number" },
+        "annualIncrease": { "type": "number" },
+        "targetIrr": { "type": "number" },
+        "timelineYears": { "type": "number" },
+        "rhythmStatus": { "type": "object" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["userId"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile document"
+    },
+    "/freedom_calculator/{calcId}": {
+      "schema": "FreedomCalculator",
+      "description": "User's freedom calculator data"
+    },
+    "/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Financial transactions collection"
+    },
+    "/habits/{habitId}": {
+      "schema": "Habit",
+      "description": "Wealth habits collection"
+    },
+    "/goals/{goalId}": {
+      "schema": "Goal",
+      "description": "Financial goals collection"
+    },
+    "/gratitude_entries/{entryId}": {
+      "schema": "GratitudeEntry",
+      "description": "Daily gratitude entries"
+    },
+    "/rituals/{ritualId}": {
+      "schema": "RitualEntry",
+      "description": "Financial self-care rituals"
+    },
+    "/money_story_responses/{responseId}": {
+      "schema": "MoneyStoryResponse",
+      "description": "User's money story reflection responses"
+    }
+  }
+}
