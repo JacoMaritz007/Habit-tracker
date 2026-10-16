@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Wallet, LogIn, Mail, Lock, UserPlus, Sparkles } from 'lucide-react';
+import { LogIn, Mail, Lock, UserPlus, Sparkles } from 'lucide-react';
 import { signInWithGoogle, loginWithEmail, registerWithEmail } from '../firebase';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -30,19 +30,17 @@ export const Login: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen brand-gradient flex items-center justify-center p-4 relative overflow-hidden">
+    <div className="min-h-screen brand-gradient flex flex-col items-center justify-center gap-8 p-4 relative overflow-hidden">
+      <img src="/brand/wealthos-logo-white.png" alt="WealthOS — Wealth Operating System" className="w-64 sm:w-80 h-auto relative z-10" />
       
       <motion.div 
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="max-w-md w-full bg-white rounded-3xl p-8 sm:p-12 shadow-2xl text-center relative z-10"
       >
-        <div className="w-16 h-16 bg-night rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-xl">
-          <Wallet className="text-primary" size={32} />
-        </div>
+        <img src="/brand/wealthos-icon.png" alt="" className="w-16 h-16 mx-auto mb-6 rounded-2xl shadow-xl" />
         
-        <p className="wh-eyebrow mb-3">Wealth Habits</p>
-        <h1 className="wh-lockup text-3xl mb-3"><b>WEALTH</b>HACKERS</h1>
+        <h1 className="text-3xl font-black text-ink tracking-tight mb-2">Wealth Habits</h1>
         <p className="text-slate-600 mb-8 leading-relaxed text-sm font-medium">
           The high-ticket coaching platform for financial mastery and mindset transformation.
         </p>
