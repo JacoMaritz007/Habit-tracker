@@ -48,7 +48,7 @@ export const BadgesGrid: React.FC<BadgesGridProps> = ({ unlockedBadgeIds }) => {
           >
             <div className={cn(
               "w-12 h-12 rounded-2xl flex items-center justify-center mb-3 transition-transform duration-500",
-              isUnlocked ? "bg-brand-bg/10 text-brand-bg rotate-0" : "bg-slate-200 text-slate-400 rotate-12"
+              isUnlocked ? "bg-primary/10 text-ink rotate-0" : "bg-slate-200 text-slate-400 rotate-12"
             )}>
               {isUnlocked ? <Icon size={24} /> : <Lock size={20} />}
             </div>

@@ -112,7 +112,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             onClick={() => setActiveTab('manual')}
             className={cn(
               "flex-1 py-2.5 rounded-xl text-sm font-bold transition-all",
-              activeTab === 'manual' ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+              activeTab === 'manual' ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
             )}
           >
             Manual
@@ -122,7 +122,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             onClick={() => setActiveTab('upload')}
             className={cn(
               "flex-1 py-2.5 rounded-xl text-sm font-bold transition-all",
-              activeTab === 'upload' ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+              activeTab === 'upload' ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
             )}
           >
             Upload CSV
@@ -166,7 +166,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
                     placeholder="0.00"
-                    className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                    className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                   />
                 </div>
               </div>
@@ -179,7 +179,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
                   placeholder="e.g. Groceries, Rent, Salary"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
@@ -190,7 +190,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   placeholder="Optional description"
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                 />
               </div>
 
@@ -201,7 +201,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
                   required
                   value={date}
                   onChange={(e) => setDate(e.target.value)}
-                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                 />
               </div>
             </div>
@@ -209,7 +209,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 bg-brand-bg text-white rounded-2xl font-bold hover:bg-brand-bg/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand-bg/20 disabled:opacity-50"
+              className="w-full py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-50"
             >
               {loading ? "Adding..." : <><Plus size={20} /> Add Transaction</>}
             </button>
@@ -225,7 +225,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               onClick={() => fileInputRef.current?.click()}
               className={cn(
                 "border-2 border-dashed rounded-3xl p-8 flex flex-col items-center justify-center gap-3 cursor-pointer transition-all",
-                file ? "border-brand-bg bg-brand-bg/5" : "border-slate-200 hover:border-brand-bg hover:bg-slate-50"
+                file ? "border-primary bg-primary/5" : "border-slate-200 hover:border-primary hover:bg-slate-50"
               )}
             >
               <input 
@@ -237,7 +237,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
               />
               {file ? (
                 <>
-                  <div className="w-12 h-12 bg-brand-bg rounded-xl flex items-center justify-center">
+                  <div className="w-12 h-12 bg-primary rounded-xl flex items-center justify-center">
                     <FileText className="text-white" size={24} />
                   </div>
                   <div className="text-center">
@@ -277,7 +277,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             <button
               onClick={handleImport}
               disabled={!file || importing}
-              className="w-full py-4 bg-brand-bg text-white rounded-2xl font-bold hover:bg-brand-bg/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand-bg/20 disabled:opacity-50"
+              className="w-full py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-50"
             >
               {importing ? (
                 <>

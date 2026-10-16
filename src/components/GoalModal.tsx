@@ -94,7 +94,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
               onClick={() => setCategory(cat)}
               className={cn(
                 "flex-1 py-2.5 rounded-xl text-xs font-bold transition-all",
-                category === cat ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+                category === cat ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
               )}
             >
               {cat.replace('-', ' ')}
@@ -111,7 +111,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. Emergency Fund, House Down Payment"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -126,7 +126,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={targetAmount}
                   onChange={(e) => setTargetAmount(e.target.value)}
                   placeholder="0"
-                  className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                  className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                 />
               </div>
             </div>
@@ -140,7 +140,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={currentAmount}
                   onChange={(e) => setCurrentAmount(e.target.value)}
                   placeholder="0"
-                  className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                  className="w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                 />
               </div>
             </div>
@@ -149,7 +149,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
           <div>
             <div className="flex justify-between items-center mb-2">
               <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider">Progress</label>
-              <span className="text-xs font-bold text-brand-bg">
+              <span className="text-xs font-bold text-ink">
                 {targetAmount && parseFloat(targetAmount) > 0 
                   ? Math.round((parseFloat(currentAmount || '0') / parseFloat(targetAmount)) * 100) 
                   : 0}% Complete
@@ -169,7 +169,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   setCurrentAmount((target * (pct / 100)).toFixed(0));
                 }
               }}
-              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-brand-bg"
+              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-primary"
             />
           </div>
 
@@ -180,7 +180,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
               required
               value={deadline}
               onChange={(e) => setDeadline(e.target.value)}
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -197,7 +197,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={why}
                   onChange={(e) => setWhy(e.target.value)}
                   placeholder="The emotional motivation behind this goal..."
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all h-20 resize-none"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all h-20 resize-none"
                 />
               </div>
 
@@ -207,7 +207,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={obstacles}
                   onChange={(e) => setObstacles(e.target.value)}
                   placeholder="What will stand in your way?"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all h-20 resize-none"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all h-20 resize-none"
                 />
               </div>
 
@@ -217,7 +217,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={partners}
                   onChange={(e) => setPartners(e.target.value)}
                   placeholder="Who can help you achieve this?"
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all h-20 resize-none"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all h-20 resize-none"
                 />
               </div>
 
@@ -227,7 +227,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={knowledge}
                   onChange={(e) => setKnowledge(e.target.value)}
                   placeholder="Skills or knowledge required..."
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all h-20 resize-none"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all h-20 resize-none"
                 />
               </div>
 
@@ -237,7 +237,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
                   value={plan}
                   onChange={(e) => setPlan(e.target.value)}
                   placeholder="The specific steps you will take..."
-                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all h-24 resize-none"
+                  className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all h-24 resize-none"
                 />
               </div>
             </div>
@@ -247,7 +247,7 @@ export const GoalModal: React.FC<GoalModalProps> = ({ isOpen, onClose, onAdd, on
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-brand-bg text-white rounded-2xl font-bold hover:bg-brand-bg/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand-bg/20 disabled:opacity-50"
+          className="w-full py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-50"
         >
           {loading ? (goal ? "Updating Goal..." : "Setting Goal...") : <><Target size={20} /> {goal ? "Update Goal" : "Set Goal"}</>}
         </button>

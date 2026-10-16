@@ -49,7 +49,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, onAdd }
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="e.g. 24-Hour Purchase Pause"
-              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+              className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
             />
           </div>
 
@@ -59,7 +59,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, onAdd }
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Explain why this habit matters..."
-              className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none resize-none transition-all"
+              className="w-full h-32 px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none resize-none transition-all"
             />
           </div>
         </div>
@@ -67,7 +67,7 @@ export const HabitModal: React.FC<HabitModalProps> = ({ isOpen, onClose, onAdd }
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-4 bg-brand-bg text-white rounded-2xl font-bold hover:bg-brand-bg/90 transition-all flex items-center justify-center gap-2 shadow-xl shadow-brand-bg/20 disabled:opacity-50"
+          className="w-full py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all flex items-center justify-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-50"
         >
           {loading ? "Adding..." : <><Plus size={20} /> Add Habit</>}
         </button>

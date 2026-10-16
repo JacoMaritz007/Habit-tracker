@@ -65,7 +65,7 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
       
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center gap-3 mb-2">
-          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-brand-bg shadow-sm border border-slate-100">
+          <div className="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-ink shadow-sm border border-slate-100">
             <Sparkles size={20} className="text-brand-accent" />
           </div>
           <div>
@@ -79,7 +79,7 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
         <div className="flex-1 space-y-4 mb-6 overflow-y-auto max-h-[400px] pr-2 custom-scrollbar">
           <div className="p-4 bg-slate-50/80 backdrop-blur-sm rounded-xl border border-slate-100 shadow-inner">
             <div className="flex items-center gap-2 mb-2">
-              <div className="w-6 h-6 bg-brand-bg rounded flex items-center justify-center text-[10px] text-white font-bold shadow-sm">W</div>
+              <div className="w-6 h-6 bg-primary rounded flex items-center justify-center text-[10px] text-white font-bold shadow-sm">W</div>
               <span className="text-xs font-bold text-slate-900">Wealth Coach</span>
             </div>
             <p className="text-xs text-slate-600 leading-relaxed">
@@ -87,9 +87,9 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
             </p>
             
             {response?.suggestedGoal && onAddGoal && (
-              <div className="mt-4 p-4 bg-brand-bg/5 border border-brand-bg/20 rounded-xl shadow-sm">
+              <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-xl shadow-sm">
                 <div className="flex items-center justify-between mb-2">
-                  <span className="text-[10px] font-black text-brand-bg uppercase tracking-[0.2em]">Suggested Goal</span>
+                  <span className="text-[10px] font-black text-ink uppercase tracking-[0.2em]">Suggested Goal</span>
                   <button 
                     onClick={() => {
                       onAddGoal(response.suggestedGoal!);
@@ -100,7 +100,7 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
                       "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all shadow-sm",
                       goalAdded 
                         ? "bg-emerald-100 text-emerald-600" 
-                        : "bg-brand-bg text-white hover:bg-brand-bg/90"
+                        : "bg-primary text-white hover:bg-primary-hover"
                     )}
                   >
                     {goalAdded ? <><CheckCircle2 size={12} /> Added</> : <><Plus size={12} /> Add to Plan</>}
@@ -139,7 +139,7 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
                         "p-1.5 rounded-lg transition-all shadow-sm",
                         addedHabits.includes(habit.title) 
                           ? "bg-emerald-100 text-emerald-600" 
-                          : "bg-brand-bg/5 text-brand-bg hover:bg-brand-bg hover:text-white"
+                          : "bg-primary/5 text-ink hover:bg-primary hover:text-white"
                       )}
                     >
                       {addedHabits.includes(habit.title) ? <CheckCircle2 size={14} /> : <Plus size={14} />}
@@ -160,7 +160,7 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
                   <button 
                     key={q} 
                     onClick={() => setMsg(q)} 
-                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] text-slate-600 hover:border-brand-bg/40 hover:text-brand-bg hover:bg-brand-bg/5 transition-all shadow-sm"
+                    className="px-3 py-1.5 bg-white border border-slate-200 rounded-lg text-[10px] text-slate-600 hover:border-primary/40 hover:text-primary-ink hover:bg-primary/5 transition-all shadow-sm"
                   >
                     {q}
                   </button>
@@ -172,7 +172,7 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
           {response && (
             <button 
               onClick={() => setResponse(null)}
-              className="text-[10px] font-bold text-brand-bg hover:underline flex items-center gap-1 px-1"
+              className="text-[10px] font-bold text-ink hover:underline flex items-center gap-1 px-1"
             >
               <RefreshCw size={10} /> Ask another question
             </button>
@@ -184,12 +184,12 @@ export const AiCoachSection = ({ title, placeholder, onSuggest, onAddHabit, onAd
             value={msg}
             onChange={(e) => setMsg(e.target.value)}
             placeholder={placeholder}
-            className="w-full h-24 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-brand-bg/20 focus:border-brand-bg/30 outline-none resize-none transition-all shadow-inner pr-12"
+            className="w-full h-24 p-4 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-focus/30 focus:border-focus outline-none resize-none transition-all shadow-inner pr-12"
           />
           <button 
             onClick={handleSubmit}
             disabled={loading || !msg.trim()}
-            className="absolute bottom-3 right-3 p-2 bg-brand-bg text-white rounded-lg hover:bg-brand-bg/90 transition-all disabled:opacity-50 shadow-lg shadow-brand-bg/20"
+            className="absolute bottom-3 right-3 p-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all disabled:opacity-50 shadow-lg shadow-primary/20"
           >
             {loading ? <RefreshCw size={16} className="animate-spin" /> : <MessageSquare size={16} />}
           </button>

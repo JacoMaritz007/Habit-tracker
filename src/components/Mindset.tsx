@@ -92,7 +92,7 @@ const MONEY_STORY_QUESTIONS = [
 const PracticeCard = ({ title, description, icon: Icon, color, onClick, actionText }: any) => (
   <button 
     onClick={onClick}
-    className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-brand-bg/20 hover:shadow-md transition-all text-left flex flex-col h-full group relative overflow-hidden"
+    className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:border-primary/20 hover:shadow-md transition-all text-left flex flex-col h-full group relative overflow-hidden"
   >
     <div className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-full -mr-12 -mt-12 blur-2xl opacity-0 group-hover:opacity-50 transition-opacity" />
     <div className="relative z-10 flex flex-col h-full">
@@ -101,7 +101,7 @@ const PracticeCard = ({ title, description, icon: Icon, color, onClick, actionTe
       </div>
       <h4 className="text-lg font-bold text-slate-900 mb-2 tracking-tight">{title}</h4>
       <p className="text-sm text-slate-500 leading-relaxed mb-6 flex-1">{description}</p>
-      <div className="flex items-center gap-2 text-xs font-bold text-brand-bg group-hover:gap-3 transition-all">
+      <div className="flex items-center gap-2 text-xs font-bold text-ink group-hover:gap-3 transition-all">
         {actionText} <ArrowRight size={14} />
       </div>
     </div>
@@ -213,7 +213,7 @@ export const Mindset = ({
     <div className="space-y-8">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">
-          <div className="w-12 h-12 bg-brand-bg/10 text-brand-bg rounded-xl flex items-center justify-center shadow-sm border border-brand-bg/5">
+          <div className="w-12 h-12 bg-primary/10 text-ink rounded-xl flex items-center justify-center shadow-sm border border-primary/5">
             <BrainCircuit size={24} />
           </div>
           <div>
@@ -352,8 +352,8 @@ export const Mindset = ({
                   })}
                 </div>
 
-                <div className="bg-brand-bg/5 p-8 rounded-2xl border border-brand-bg/10 text-center">
-                  <Sparkles size={32} className="text-brand-bg mx-auto mb-4" />
+                <div className="bg-primary/5 p-8 rounded-2xl border border-primary/10 text-center">
+                  <Sparkles size={32} className="text-ink mx-auto mb-4" />
                   <h3 className="text-xl font-bold text-slate-900 mb-2">This is just the beginning.</h3>
                   <p className="text-slate-500 mb-6 max-w-lg mx-auto">You've surfaced the subconscious patterns. Now, you have the power to consciously choose a different path.</p>
                   <button 
@@ -362,7 +362,7 @@ export const Mindset = ({
                       setIsAnswering(true);
                       setCurrentQuestionIndex(0);
                     }}
-                    className="px-6 py-3 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20"
+                    className="px-6 py-3 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20"
                   >
                     Edit Your Story
                   </button>
@@ -386,11 +386,11 @@ export const Mindset = ({
                 <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-lg shadow-slate-200/50 mb-8">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Question {currentQuestionIndex + 1} of 8</span>
-                    <span className="text-base font-black text-brand-bg">{Math.round(((currentQuestionIndex + 1) / MONEY_STORY_QUESTIONS.length) * 100)}%</span>
+                    <span className="text-base font-black text-ink">{Math.round(((currentQuestionIndex + 1) / MONEY_STORY_QUESTIONS.length) * 100)}%</span>
                   </div>
                   <div className="w-full h-2 bg-slate-100 rounded-full mb-8 overflow-hidden">
                     <motion.div 
-                      className="h-full bg-brand-bg"
+                      className="h-full bg-primary"
                       initial={{ width: 0 }}
                       animate={{ width: `${((currentQuestionIndex + 1) / MONEY_STORY_QUESTIONS.length) * 100}%` }}
                     />
@@ -398,7 +398,7 @@ export const Mindset = ({
 
                   <div className="space-y-8">
                     <div>
-                      <span className="text-[10px] font-black text-brand-bg uppercase tracking-[0.2em] mb-2 block">{MONEY_STORY_QUESTIONS[currentQuestionIndex].title}</span>
+                      <span className="text-[10px] font-black text-ink uppercase tracking-[0.2em] mb-2 block">{MONEY_STORY_QUESTIONS[currentQuestionIndex].title}</span>
                       <h3 className="text-xl font-bold text-slate-900 mb-2 tracking-tight leading-tight">{MONEY_STORY_QUESTIONS[currentQuestionIndex].question}</h3>
                       <p className="text-sm text-slate-500 leading-relaxed">{MONEY_STORY_QUESTIONS[currentQuestionIndex].description}</p>
                     </div>
@@ -408,7 +408,7 @@ export const Mindset = ({
                         value={getAnswer(MONEY_STORY_QUESTIONS[currentQuestionIndex].id)}
                         onChange={(e) => setTempAnswers(prev => ({ ...prev, [MONEY_STORY_QUESTIONS[currentQuestionIndex].id]: e.target.value }))}
                         placeholder={MONEY_STORY_QUESTIONS[currentQuestionIndex].placeholder}
-                        className="w-full h-48 p-6 rounded-xl border-2 border-slate-100 focus:border-brand-bg focus:ring-0 transition-all text-base text-slate-900 resize-none shadow-inner bg-slate-50/50"
+                        className="w-full h-48 p-6 rounded-xl border-2 border-slate-100 focus:border-focus focus:ring-0 transition-all text-base text-slate-900 resize-none shadow-inner bg-slate-50/50"
                       />
                       <p className="mt-4 text-xs text-slate-400 italic flex items-center gap-2">
                         <Sparkles size={12} /> There are no right or wrong answers. Write freely — this is for you alone.
@@ -433,14 +433,14 @@ export const Mindset = ({
                   {currentQuestionIndex === MONEY_STORY_QUESTIONS.length - 1 ? (
                     <button
                       onClick={handleSaveMoneyStory}
-                      className="flex items-center gap-2 px-8 py-3 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/30 text-sm"
+                      className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 text-sm"
                     >
                       Complete Story <CheckCircle2 size={18} />
                     </button>
                   ) : (
                     <button
                       onClick={handleNextQuestion}
-                      className="flex items-center gap-2 px-8 py-3 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/30 text-sm"
+                      className="flex items-center gap-2 px-8 py-3 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 text-sm"
                     >
                       Next <ArrowRight size={18} />
                     </button>
@@ -464,10 +464,10 @@ export const Mindset = ({
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
                   <div className="space-y-8">
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 to-brand-bg p-8 text-white shadow-lg shadow-indigo-900/20 min-h-[400px] flex flex-col justify-center">
+                    <div className="relative overflow-hidden rounded-2xl brand-gradient p-8 text-white shadow-lg min-h-[400px] flex flex-col justify-center">
                       <div className="relative z-10 flex flex-col items-center text-center">
                         <div className="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-xl">
-                          <BookOpen size={32} className="text-white" />
+                          <BookOpen size={32} className="text-primary" />
                         </div>
                         
                         <div className="inline-block px-6 py-2 bg-white/10 backdrop-blur-md rounded-xl border border-white/20 mb-6">
@@ -563,7 +563,7 @@ export const Mindset = ({
 
                 <div className="bg-slate-50/50 p-8 rounded-2xl border border-slate-200">
                   <div className="flex items-center gap-3 mb-8">
-                    <div className="w-10 h-10 rounded-xl bg-brand-bg/10 text-brand-bg flex items-center justify-center">
+                    <div className="w-10 h-10 rounded-xl bg-primary/10 text-ink flex items-center justify-center">
                       <BookOpen size={20} />
                     </div>
                     <h3 className="text-xl font-bold text-slate-900 tracking-tight">What you'll explore</h3>
@@ -572,13 +572,13 @@ export const Mindset = ({
                     {MONEY_STORY_QUESTIONS.map((q, idx) => {
                       const answer = moneyStoryResponses.find(r => r.questionId === q.id)?.answer;
                       return (
-                        <div key={q.id} className="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between group hover:border-brand-bg/20 hover:shadow-md transition-all">
+                        <div key={q.id} className="bg-white p-6 rounded-xl border border-slate-200 flex items-center justify-between group hover:border-primary/20 hover:shadow-md transition-all">
                           <div className="flex items-center gap-4">
-                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-black text-slate-400 group-hover:bg-brand-bg group-hover:text-white transition-all">
+                            <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-black text-slate-400 group-hover:bg-primary group-hover:text-white transition-all">
                               {idx + 1}
                             </div>
                             <div>
-                              <p className="text-sm font-bold text-slate-900 group-hover:text-brand-bg transition-colors">{q.question}</p>
+                              <p className="text-sm font-bold text-slate-900 group-hover:text-primary-ink transition-colors">{q.question}</p>
                               <p className={cn("text-[10px] font-bold uppercase tracking-widest mt-1", answer ? 'text-emerald-600' : 'text-slate-400')}>
                                 {answer ? 'Completed' : 'Not answered'}
                               </p>
@@ -590,7 +590,7 @@ export const Mindset = ({
                                 setCurrentQuestionIndex(idx);
                                 setIsAnswering(true);
                               }}
-                              className="text-xs font-bold text-brand-bg opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 px-3 py-1.5 bg-brand-bg/5 rounded-lg"
+                              className="text-xs font-bold text-ink opacity-0 group-hover:opacity-100 transition-all flex items-center gap-2 px-3 py-1.5 bg-primary/5 rounded-lg"
                             >
                               Edit <ArrowRight size={14} />
                             </button>
@@ -629,7 +629,7 @@ export const Mindset = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               <div className="space-y-8">
-                <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 p-8 text-white shadow-lg shadow-purple-900/20 min-h-[400px] flex flex-col justify-center">
+                <div className="relative overflow-hidden rounded-2xl brand-gradient p-8 text-white shadow-lg min-h-[400px] flex flex-col justify-center">
                   <div className="relative z-10 flex flex-col items-center text-center">
                     <div className="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-xl">
                       <Sparkles size={32} className="text-white" />
@@ -767,7 +767,7 @@ export const Mindset = ({
                   className="h-full"
                 />
 
-                <div className="bg-[#1B7D4B] rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-900/20">
+                <div className="bg-emerald-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-emerald-900/20">
                   <div className="relative z-10">
                     <h4 className="text-lg font-bold mb-3">The Science in One Sentence</h4>
                     <p className="text-white text-xs leading-relaxed opacity-90">
@@ -845,7 +845,7 @@ export const Mindset = ({
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
               <div className="space-y-8">
-                <div className="bg-[#E11D48] rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-rose-900/20 min-h-[400px] flex flex-col justify-center">
+                <div className="bg-rose-600 rounded-2xl p-8 text-white relative overflow-hidden shadow-lg shadow-rose-900/20 min-h-[400px] flex flex-col justify-center">
                   <div className="relative z-10 flex flex-col items-center text-center">
                     <div className="w-16 h-16 bg-white/10 backdrop-blur-xl rounded-2xl flex items-center justify-center mb-8 border border-white/20 shadow-xl">
                       <Heart size={32} className="text-white" />
@@ -986,12 +986,12 @@ export const Mindset = ({
             </div>
 
             <div className="bg-gradient-to-br from-slate-50 to-white p-8 rounded-2xl border border-slate-200 shadow-lg relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-96 h-96 bg-brand-bg/5 rounded-full -mr-48 -mt-48 blur-3xl" />
+              <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full -mr-48 -mt-48 blur-3xl" />
               <div className="absolute bottom-0 left-0 w-64 h-64 bg-rose-500/5 rounded-full -ml-32 -mb-32 blur-3xl" />
               
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-brand-bg/10 text-brand-bg flex items-center justify-center shadow-inner border border-brand-bg/10">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-ink flex items-center justify-center shadow-inner border border-primary/10">
                     <Sparkles size={24} />
                   </div>
                   <h5 className="text-2xl font-bold text-slate-900 tracking-tight">The Power of Ritual</h5>

@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { CheckCircle2, TrendingUp, Bell, Plus } from 'lucide-react';
+import { CheckCircle2, TrendingUp, Bell, Plus, Check } from 'lucide-react';
 import { format, startOfToday } from 'date-fns';
 import { cn } from '../lib/utils';
 import { Habit } from '../types';
@@ -8,7 +8,7 @@ import { AiCoachSection } from './AiCoachSection';
 
 const InfoCard = ({ title, description, icon: Icon, color }: any) => (
   <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex items-start gap-4">
-    <div className={cn("p-2 rounded-lg", color === 'brand' ? "bg-brand-bg/10 text-brand-bg" : color === 'accent' ? "bg-brand-accent/10 text-brand-accent" : "bg-slate-100 text-slate-600")}>
+    <div className={cn("p-2 rounded-lg", color === 'brand' ? "bg-primary/10 text-ink" : color === 'accent' ? "bg-brand-accent/10 text-brand-accent" : "bg-slate-100 text-slate-600")}>
       <Icon size={20} />
     </div>
     <div>
@@ -79,23 +79,23 @@ export const Habits = ({ habits, toggleHabit, onSuggestHabits, onAddHabit, onAdd
                 className={cn(
                   "p-4 rounded-xl border transition-all duration-200 flex items-start gap-4 group",
                   habit.completedDays.includes(today)
-                    ? "bg-brand-bg/5 border-brand-bg/20"
-                    : "bg-white border-slate-200 hover:border-brand-bg/30"
+                    ? "bg-emerald-50 border-emerald-100"
+                    : "bg-white border-slate-200 hover:border-primary/30"
                 )}
               >
                 <div 
                   className={cn(
-                    "w-6 h-6 rounded-md border-2 flex items-center justify-center transition-colors cursor-pointer",
+                    "w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors cursor-pointer",
                     habit.completedDays.includes(today)
-                      ? "bg-brand-bg border-brand-bg"
-                      : "border-slate-300"
+                      ? "bg-emerald-500 border-emerald-500"
+                      : "border-slate-300 hover:border-emerald-500"
                   )}
                   onClick={() => toggleHabit(habit.id)}
                 >
-                  {habit.completedDays.includes(today) && <Plus size={14} className="text-white rotate-45" />}
+                  {habit.completedDays.includes(today) && <Check size={14} strokeWidth={3} className="text-white" />}
                 </div>
                 <div className="flex-1 cursor-pointer" onClick={() => toggleHabit(habit.id)}>
-                  <h4 className={cn("font-bold text-sm mb-1", habit.completedDays.includes(today) ? "text-brand-bg" : "text-slate-900")}>
+                  <h4 className={cn("font-bold text-sm mb-1", habit.completedDays.includes(today) ? "text-ink" : "text-slate-900")}>
                     {habit.title}
                   </h4>
                   <p className="text-xs text-slate-500">{habit.description}</p>

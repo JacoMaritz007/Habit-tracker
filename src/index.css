@@ -1,25 +1,137 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 @import "tailwindcss";
+/* Wealth Hackers design system: tokens, base type and .wh-* components.
+   Layered so Tailwind utilities still win over its element defaults. */
+@import "./styles/wealth-hackers.css" layer(components);
 
+/* Map Tailwind's palette onto Wealth Hackers tokens so every existing
+   utility (slate, emerald, rose, indigo…) renders in brand colours. */
 @theme {
-  --color-brand-bg: #2a4661;
-  --color-brand-accent: #b08a45;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+  --font-sans: "Inter", Arial, system-ui, sans-serif;
+  --font-display: "Montserrat", Arial, system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Brand roles */
+  --color-primary: #F47C20;        /* CTA orange */
+  --color-primary-hover: #E06B12;
+  --color-primary-press: #C95E0C;
+  --color-primary-soft: #FDEEE2;
+  --color-primary-ink: #B5560E;    /* orange text on light grounds (4.5:1) */
+  --color-ink: #1F2933;            /* charcoal: headings, fg1 */
+  --color-night: #000000;          /* spotlight / dark panels */
+  --color-night-2: #0C1116;
+  --color-focus: #0077B6;          /* focus rings, links */
+  --color-brand-accent: #D4A017;   /* premium gold */
+  --color-gold-ink: #8A6800;
+
+  /* Neutrals → WH charcoal/slate/mute/line/fill/grey */
+  --color-slate-50: #F4F6F8;
+  --color-slate-100: #EDF1F4;
+  --color-slate-200: #E1E6EB;
+  --color-slate-300: #C5CED6;
+  --color-slate-400: #7B8794;
+  --color-slate-500: #5F6B77;
+  --color-slate-600: #4A5763;
+  --color-slate-700: #2C3742;
+  --color-slate-800: #1F2933;
+  --color-slate-900: #1F2933;
+  --color-slate-950: #0C1116;
+
+  /* Success → WH green */
+  --color-emerald-50: #E2F5EC;
+  --color-emerald-100: #C6EBD8;
+  --color-emerald-200: #99DBB9;
+  --color-emerald-300: #5CC78F;
+  --color-emerald-400: #2FB56F;
+  --color-emerald-500: #00A651;
+  --color-emerald-600: #007A3C;
+  --color-emerald-700: #006632;
+  --color-emerald-800: #004F27;
+  --color-emerald-900: #003A1D;
+  --color-emerald-950: #00240F;
+
+  /* Danger → WH red */
+  --color-rose-50: #FBE7E7;
+  --color-rose-100: #F6CFCF;
+  --color-rose-200: #EEA9A9;
+  --color-rose-300: #E57B7B;
+  --color-rose-400: #DD5858;
+  --color-rose-500: #D93F3F;
+  --color-rose-600: #B83030;
+  --color-rose-700: #992727;
+  --color-rose-800: #7A1F1F;
+  --color-rose-900: #5C1717;
+  --color-rose-950: #3D0F0F;
+
+  /* Info → WH blue (indigo, blue and purple all collapse to it) */
+  --color-blue-50: #E6F1F8;
+  --color-blue-100: #CCE3F0;
+  --color-blue-200: #99C8E2;
+  --color-blue-300: #5FA8D1;
+  --color-blue-400: #2E8FC4;
+  --color-blue-500: #0077B6;
+  --color-blue-600: #0077B6;
+  --color-blue-700: #005E91;
+  --color-blue-800: #00496F;
+  --color-blue-900: #003A5C;
+  --color-blue-950: #00253B;
+  --color-indigo-50: #E6F1F8;
+  --color-indigo-100: #CCE3F0;
+  --color-indigo-200: #99C8E2;
+  --color-indigo-500: #0077B6;
+  --color-indigo-600: #0077B6;
+  --color-indigo-700: #005E91;
+  --color-indigo-900: #003A5C;
+  --color-indigo-950: #00253B;
+  --color-purple-50: #E2F6FD;
+  --color-purple-500: #00AEEF;
+  --color-purple-600: #00759F;
+  --color-purple-900: #003A5C;
+  --color-purple-950: #00253B;
+  --color-pink-500: #F47C20;
+  --color-pink-600: #B5560E;
+
+  /* Premium → WH gold */
+  --color-amber-50: #F8F0DA;
+  --color-amber-100: #F1E2B5;
+  --color-amber-500: #D4A017;
+  --color-amber-600: #8A6800;
+  --color-amber-700: #6E5300;
+
+  /* Radii: WH r-sm 6 / r-md 10 / r-lg 16 / r-xl 24 */
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 10px;
+  --radius-2xl: 16px;
+  --radius-3xl: 24px;
+
+  /* Shadows: WH sh-sm / sh-md / sh-lg */
+  --shadow-sm: 0 1px 2px rgba(16,25,33,.06), 0 1px 3px rgba(16,25,33,.08);
+  --shadow-md: 0 4px 12px rgba(16,25,33,.08), 0 2px 4px rgba(16,25,33,.06);
+  --shadow-lg: 0 16px 40px rgba(16,25,33,.12), 0 4px 12px rgba(16,25,33,.08);
+  --shadow-xl: 0 16px 40px rgba(16,25,33,.12), 0 4px 12px rgba(16,25,33,.08);
+  --shadow-2xl: 0 24px 56px rgba(16,25,33,.18), 0 6px 16px rgba(16,25,33,.10);
 }
 
 @layer base {
   body {
-    @apply font-sans bg-slate-50 text-slate-900;
+    @apply font-sans bg-slate-50 text-slate-600;
+  }
+  /* Headings and big numbers use Montserrat, per WH type rules */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: var(--font-display);
   }
 }
 
 @layer utilities {
+  .font-black { font-family: var(--font-display); font-weight: 800; }
   .glass {
-    @apply bg-white/80 backdrop-blur-md border border-white/20;
+    @apply bg-white border border-slate-200;
   }
+  /* WH signature: studio spotlight on black */
   .brand-gradient {
-    @apply bg-gradient-to-br from-[#2a4661] to-[#1a2e40];
+    background:
+      radial-gradient(60% 55% at 50% 0%, rgba(255,255,255,.16) 0%, rgba(255,255,255,.05) 40%, transparent 70%),
+      #000;
   }
   .custom-scrollbar::-webkit-scrollbar {
     width: 6px;
