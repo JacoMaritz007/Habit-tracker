@@ -17,6 +17,8 @@ import { TransactionModal } from './components/TransactionModal';
 import { HabitModal } from './components/HabitModal';
 import { GoalModal } from './components/GoalModal';
 import { ChatDrawer } from './components/ChatDrawer';
+import { Admin } from './components/Admin';
+import { isAdminUser } from './lib/admin';
 import { cn } from './lib/utils';
 import { 
   Transaction, 
@@ -484,6 +486,8 @@ export default function App() {
     }
   };
 
+  const isAdmin = isAdminUser(user, userProfile);
+
   if (!isAuthReady) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50">
@@ -525,6 +529,7 @@ export default function App() {
             }} 
             onClose={() => setIsSidebarOpen(false)}
             userProfile={userProfile}
+            isAdmin={isAdmin}
           />
         </div>
 
@@ -688,6 +693,17 @@ export default function App() {
                     onSuggestAdvice={handleSuggestAdvice}
                     onSuggestMoneyStoryAdvice={handleSuggestMoneyStoryAdvice}
                   />
+                </motion.div>
+              )}
+              {activeTab === 'admin' && isAdmin && (
+                <motion.div 
+                  key="admin"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-8"
+                >
+                  <Admin currentUid={user.uid} />
                 </motion.div>
               )}
               {activeTab === 'account' && (

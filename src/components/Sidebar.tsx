@@ -8,7 +8,8 @@ import {
   ChevronRight,
   Calculator,
   X,
-  Trophy
+  Trophy,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProgressIndicator } from './ProgressIndicator';
@@ -52,7 +53,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }
   </div>
 );
 
-export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile }: { activeTab: string, setActiveTab: (t: string) => void, onClose?: () => void, userProfile?: any }) => {
+export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin }: { activeTab: string, setActiveTab: (t: string) => void, onClose?: () => void, userProfile?: any, isAdmin?: boolean }) => {
   return (
     <aside className="w-full h-full border-r border-slate-200 bg-white flex flex-col">
       <div className="p-6 flex items-center justify-between border-b border-slate-100">
@@ -125,6 +126,18 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile }: { act
           onClick={() => setActiveTab('account')} 
           activeTab={activeTab}
         />
+        {isAdmin && (
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <p className="wh-label px-3 mb-2 !text-[10px]">Admin</p>
+            <SidebarItem 
+              icon={ShieldCheck} 
+              label="Members" 
+              active={activeTab === 'admin'} 
+              onClick={() => setActiveTab('admin')} 
+              activeTab={activeTab}
+            />
+          </div>
+        )}
       </nav>
 
       <div className="p-4 border-t border-slate-100">

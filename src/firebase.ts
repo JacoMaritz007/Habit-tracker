@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
-import { getFirestore, collection, doc, setDoc, getDoc, getDocs, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
+import { getFirestore, connectFirestoreEmulator, collection, doc, setDoc, getDoc, getDocs, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
 
 // Import the Firebase configuration
 import firebaseConfig from '../firebase-applet-config.json';
@@ -8,6 +8,13 @@ import firebaseConfig from '../firebase-applet-config.json';
 // Initialize Firebase SDK
 const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app, firebaseConfig.firestoreDatabaseId);
+
+// Local development only: VITE_FIRESTORE_EMULATOR=127.0.0.1:8080 npm run dev
+const emulatorHost = import.meta.env.VITE_FIRESTORE_EMULATOR as string | undefined;
+if (emulatorHost) {
+  const [host, port] = emulatorHost.split(':');
+  connectFirestoreEmulator(db, host, Number(port));
+}
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
