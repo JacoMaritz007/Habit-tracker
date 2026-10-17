@@ -57,6 +57,7 @@
   ],
   "firestore": {
     "rules": "firestore.rules",
-    "database": "(default)"
+    "database": "(default)",
+    "indexes": "firestore.indexes.json"
   }
 }
