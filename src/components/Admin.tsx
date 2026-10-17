@@ -4,8 +4,9 @@ import { format, subDays } from 'date-fns';
 import Papa from 'papaparse';
 import {
   Users, UserPlus, CheckCircle2, Target, Receipt, Search, Download, RefreshCw,
-  ShieldCheck, Shield, Flame, Mail, CalendarDays,
+  ShieldCheck, Shield, Flame, Mail, CalendarDays, Megaphone, Send,
 } from 'lucide-react';
+import { sendAnnouncement } from '../services/notifications';
 import { db } from '../firebase';
 import { cn } from '../lib/utils';
 import { calculateLevel } from '../lib/progress';
@@ -51,6 +52,7 @@ export const Admin = ({ currentUid }: { currentUid: string }) => {
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState<AdminUser | null>(null);
+  const [announceTo, setAnnounceTo] = useState<AdminUser[] | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -127,6 +129,15 @@ export const Admin = ({ currentUid }: { currentUid: string }) => {
           <h1 className="text-3xl font-black text-ink tracking-tight">Members overview</h1>
           <p className="text-slate-500 mt-1">Everyone using Wealth Habits, and how they're progressing.</p>
         </div>
+        <div className="flex items-center gap-2">
+        <button
+          onClick={() => setAnnounceTo(users)}
+          disabled={loading || !users.length}
+          className="flex items-center gap-2 h-10 px-4 rounded-full bg-ink text-white text-sm font-semibold hover:bg-slate-700 transition-colors disabled:opacity-50"
+        >
+          <Megaphone size={16} />
+          Send announcement
+        </button>
         <button
           onClick={load}
           disabled={loading}
@@ -135,6 +146,7 @@ export const Admin = ({ currentUid }: { currentUid: string }) => {
           <RefreshCw size={16} className={cn(loading && 'animate-spin')} />
           Refresh
         </button>
+        </div>
       </div>
 
       {error && (
@@ -216,16 +228,24 @@ export const Admin = ({ currentUid }: { currentUid: string }) => {
         </div>
       </div>
 
-      <UserDetail user={selected} currentUid={currentUid} onClose={() => setSelected(null)} onSetRole={setRole} />
+      <UserDetail
+        user={selected}
+        currentUid={currentUid}
+        onClose={() => setSelected(null)}
+        onSetRole={setRole}
+        onNotify={u => { setSelected(null); setAnnounceTo([u]); }}
+      />
+      <AnnouncementModal recipients={announceTo} senderUid={currentUid} total={users.length} onClose={() => setAnnounceTo(null)} />
     </div>
   );
 };
 
-const UserDetail = ({ user, currentUid, onClose, onSetRole }: {
+const UserDetail = ({ user, currentUid, onClose, onSetRole, onNotify }: {
   user: AdminUser | null;
   currentUid: string;
   onClose: () => void;
   onSetRole: (u: AdminUser, role: 'user' | 'admin') => Promise<void>;
+  onNotify: (u: AdminUser) => void;
 }) => {
   const [habits, setHabits] = useState<Habit[]>([]);
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -333,6 +353,14 @@ const UserDetail = ({ user, currentUid, onClose, onSetRole }: {
           <p className="text-xs text-slate-500">
             {isSelf ? "You can't change your own role." : isAdmin ? 'Admins can see every member and manage roles.' : 'Make this member an admin to give them access to this page.'}
           </p>
+          <div className="flex items-center gap-2 shrink-0">
+          <button
+            onClick={() => onNotify(user)}
+            className="flex items-center gap-2 h-10 px-4 rounded-full border border-slate-200 text-sm font-semibold text-ink hover:border-ink transition-colors"
+          >
+            <Send size={16} />
+            Send notification
+          </button>
           <button
             onClick={toggleRole}
             disabled={isSelf || saving}
@@ -344,8 +372,84 @@ const UserDetail = ({ user, currentUid, onClose, onSetRole }: {
             {isAdmin ? <Shield size={16} /> : <ShieldCheck size={16} />}
             {isAdmin ? 'Remove admin' : 'Make admin'}
           </button>
+          </div>
         </div>
       </div>
+    </Modal>
+  );
+};
+
+const AnnouncementModal = ({ recipients, senderUid, total, onClose }: {
+  recipients: AdminUser[] | null;
+  senderUid: string;
+  total: number;
+  onClose: () => void;
+}) => {
+  const [title, setTitle] = useState('');
+  const [body, setBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<{ ok: boolean; text: string } | null>(null);
+
+  useEffect(() => {
+    if (recipients) { setTitle(''); setBody(''); setResult(null); }
+  }, [recipients]);
+
+  if (!recipients) return null;
+  const single = recipients.length === 1 && total !== 1;
+  const audience = single
+    ? recipients[0].displayName || recipients[0].email || 'this member'
+    : `all ${recipients.length} member${recipients.length === 1 ? '' : 's'}`;
+
+  const send = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSending(true);
+    setResult(null);
+    try {
+      await sendAnnouncement(senderUid, recipients.map(r => r.id), title.trim(), body.trim());
+      setResult({ ok: true, text: `Sent to ${audience}.` });
+      setTitle('');
+      setBody('');
+    } catch (err) {
+      console.error(err);
+      setResult({ ok: false, text: "Couldn't send. Check you're signed in as an admin and try again." });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  return (
+    <Modal isOpen onClose={onClose} title={single ? 'Send notification' : 'Send announcement'} size="lg">
+      <form onSubmit={send} className="space-y-4">
+        <p className="text-sm text-slate-600">
+          Goes to <span className="font-semibold text-ink">{audience}</span>. It appears in their notification bell.
+        </p>
+        <div className="wh-field">
+          <label className="wh-field__label" htmlFor="ann-title">Title</label>
+          <input id="ann-title" className="wh-input" required maxLength={120} value={title}
+            onChange={e => setTitle(e.target.value)} placeholder="e.g. New masterclass this Thursday" />
+        </div>
+        <div className="wh-field">
+          <label className="wh-field__label" htmlFor="ann-body">Message</label>
+          <textarea id="ann-body" className="wh-textarea" maxLength={1000} value={body}
+            onChange={e => setBody(e.target.value)} placeholder="Optional details" />
+          <span className="wh-field__hint">{body.length}/1000</span>
+        </div>
+        {result && (
+          <div className={cn('p-3 rounded-xl text-sm font-medium', result.ok ? 'bg-emerald-50 text-emerald-700' : 'bg-rose-50 text-rose-700')}>
+            {result.text}
+          </div>
+        )}
+        <div className="flex justify-end gap-2 pt-2">
+          <button type="button" onClick={onClose} className="h-10 px-4 rounded-full text-sm font-semibold text-ink hover:bg-slate-100">
+            {result?.ok ? 'Done' : 'Cancel'}
+          </button>
+          <button type="submit" disabled={sending || !title.trim()}
+            className="flex items-center gap-2 h-10 px-5 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary-hover disabled:opacity-50">
+            <Send size={16} />
+            {sending ? 'Sending…' : 'Send'}
+          </button>
+        </div>
+      </form>
     </Modal>
   );
 };

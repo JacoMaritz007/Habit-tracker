@@ -265,6 +265,33 @@ service cloud.firestore {
       allow delete: if isDocOwner() || isAdmin();
     }
 
+    // Notifications: one document per recipient.
+    // Members create their own activity notifications; only admins send
+    // announcements (to anyone). Recipients may only flip `read`.
+    function isValidNotification(data) {
+      return data.keys().hasOnly(['userId', 'type', 'title', 'body', 'read', 'createdAt', 'sentBy']) &&
+             data.userId is string &&
+             data.title is string && data.title.size() > 0 && data.title.size() <= 120 &&
+             data.body is string && data.body.size() <= 1000 &&
+             data.read == false &&
+             isRecent(data.createdAt);
+    }
+
+    match /notifications/{notificationId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isValidNotification(request.resource.data) && (
+        (isOwner(request.resource.data.userId) &&
+         request.resource.data.type in ['welcome', 'level_up', 'badge', 'goal_complete', 'streak'] &&
+         !('sentBy' in request.resource.data)) ||
+        (isAdmin() && request.resource.data.type == 'announcement' &&
+         request.resource.data.sentBy == request.auth.uid)
+      );
+      allow update: if isDocOwner() &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']) &&
+                       request.resource.data.read is bool;
+      allow delete: if isDocOwner() || isAdmin();
+    }
+
     match /freedom_calculator/{calcId} {
       allow read: if isOwner(calcId) || isAdmin();
       allow create: if isOwner(calcId) && isValidFreedomCalculator(request.resource.data);
