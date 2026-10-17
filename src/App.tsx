@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, LogOut, MessageSquare, Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, query, where, onSnapshot, doc, setDoc, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, serverTimestamp, increment } from 'firebase/firestore';
 import { auth, db, logout, handleFirestoreError, OperationType } from './firebase';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
@@ -62,17 +62,33 @@ export default function App() {
       setIsAuthReady(true);
       
       if (currentUser) {
-        // Ensure user document exists
+        // Create the profile on first sign-in; afterwards only refresh identity
+        // fields so role, createdAt and progress are never overwritten.
+        // Null fields are omitted: email/password accounts have no displayName
+        // or photoURL, and the rules only accept strings there.
         const userDocRef = doc(db, 'users', currentUser.uid);
-        try {
-          await setDoc(userDocRef, {
+        const identity = Object.fromEntries(
+          Object.entries({
             uid: currentUser.uid,
             email: currentUser.email,
             displayName: currentUser.displayName,
             photoURL: currentUser.photoURL,
-            role: 'user',
-            createdAt: serverTimestamp()
-          }, { merge: true });
+          }).filter(([, value]) => value != null)
+        );
+        try {
+          const existing = await getDoc(userDocRef);
+          if (existing.exists()) {
+            await setDoc(userDocRef, identity, { merge: true });
+          } else {
+            await setDoc(userDocRef, {
+              ...identity,
+              role: 'user',
+              xp: 0,
+              level: 1,
+              badges: [],
+              createdAt: serverTimestamp()
+            });
+          }
         } catch (error) {
           handleFirestoreError(error, OperationType.WRITE, `users/${currentUser.uid}`);
         }
@@ -390,7 +406,8 @@ export default function App() {
     const oldLevel = calculateLevel(userProfile.xp || 0);
     const newLevel = calculateLevel(newXP);
     
-    const updateData: any = { xp: newXP };
+    // increment() so two quick awards can't overwrite each other.
+    const updateData: any = { xp: increment(amount) };
     if (newLevel > oldLevel) {
       updateData.level = newLevel;
       // Level up logic could go here (notifications etc)

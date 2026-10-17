@@ -99,7 +99,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
         wealthChallenge,
         enneagramType,
         currency,
-        photoAnalysis: analysisResult,
+        ...(analysisResult ? { photoAnalysis: analysisResult } : {}),
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -115,24 +115,22 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
     if (!file) return;
 
     setIsAnalyzing(true);
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
         const base64String = (reader.result as string).split(',')[1];
         const result = await analyzeProfilePhoto(base64String, file.type);
         setAnalysisResult(result);
-        // Auto-save the analysis
-        await updateUserProfile({
-          ...userProfile,
-          photoAnalysis: result
-        });
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Error analyzing photo:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
+        // Auto-save just the analysis; spreading the cached profile could
+        // overwrite newer XP or badges.
+        await updateUserProfile({ photoAnalysis: result });
+      } catch (error) {
+        console.error('Error analyzing photo:', error);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
