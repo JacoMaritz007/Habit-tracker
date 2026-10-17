@@ -10,10 +10,8 @@ import { GoogleGenAI } from '@google/genai';
 
 const GEMINI_API_KEY = defineSecret('GEMINI_API_KEY');
 
-// Users sign in through the app's existing Firebase Auth project, which is
-// not the project hosting this function, so verify tokens against that one.
-const AUTH_PROJECT_ID = 'gen-lang-client-0534737102';
-const authApp = initializeApp({ projectId: AUTH_PROJECT_ID }, 'auth-project');
+// Users sign in with Firebase Auth in this same project.
+const authApp = initializeApp();
 
 const MODEL = 'gemini-3-flash-preview';
 const ALLOWED_CONFIG_KEYS = ['systemInstruction', 'responseMimeType'];
