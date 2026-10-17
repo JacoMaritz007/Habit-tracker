@@ -1,7 +1,26 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { LogIn, Mail, Lock, UserPlus, Sparkles } from 'lucide-react';
-import { signInWithGoogle, loginWithEmail, registerWithEmail } from '../firebase';
+import { signInWithGoogle, getGoogleRedirectResult, loginWithEmail, registerWithEmail } from '../firebase';
 import { motion, AnimatePresence } from 'motion/react';
+
+const AUTH_ERRORS: Record<string, string> = {
+  'auth/unauthorized-domain': "This website isn't approved for Google sign-in yet. Please contact support.",
+  'auth/operation-not-allowed': "Google sign-in isn't switched on for this app yet.",
+  'auth/admin-restricted-operation': "Google sign-in isn't available for this account.",
+  'auth/account-exists-with-different-credential': 'An account with this email already exists. Sign in with email and password instead.',
+  'auth/network-request-failed': 'Network problem. Check your connection and try again.',
+  'auth/too-many-requests': 'Too many attempts. Please wait a moment and try again.',
+  'auth/invalid-credential': 'Email or password is incorrect.',
+  'auth/user-not-found': 'No account found with that email.',
+  'auth/wrong-password': 'Email or password is incorrect.',
+  'auth/email-already-in-use': 'An account with this email already exists. Sign in instead.',
+  'auth/weak-password': 'Password must be at least 6 characters.',
+  'auth/invalid-email': 'Enter a valid email address.',
+};
+// Closing the Google window isn't an error worth showing.
+const SILENT = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request'];
+const authMessage = (err: any) =>
+  AUTH_ERRORS[err?.code] || `Sign-in failed${err?.code ? ` (${err.code})` : ''}. Please try again.`;
 
 export const Login: React.FC = () => {
   const [isRegistering, setIsRegistering] = useState(false);
@@ -9,6 +28,23 @@ export const Login: React.FC = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getGoogleRedirectResult().catch(err => {
+      console.error(err);
+      if (!SILENT.includes(err?.code)) setError(authMessage(err));
+    });
+  }, []);
+
+  const handleGoogle = async () => {
+    setError('');
+    try {
+      await signInWithGoogle();
+    } catch (err: any) {
+      console.error(err);
+      if (!SILENT.includes(err?.code)) setError(authMessage(err));
+    }
+  };
 
   const handleEmailAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -23,7 +59,7 @@ export const Login: React.FC = () => {
       }
     } catch (err: any) {
       console.error(err);
-      setError(err.message || 'Authentication failed. Please check your credentials.');
+      setError(authMessage(err));
     } finally {
       setLoading(false);
     }
@@ -104,7 +140,7 @@ export const Login: React.FC = () => {
         </div>
         
         <button 
-          onClick={signInWithGoogle}
+          onClick={handleGoogle}
           className="w-full h-13 bg-white border border-slate-200 text-ink rounded-full font-semibold hover:border-ink transition-all active:scale-[0.98] flex items-center justify-center gap-3"
         >
           <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google" className="w-5 h-5" />

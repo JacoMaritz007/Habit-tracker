@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, signInWithPopup, signOut, onAuthStateChanged, User, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, signOut, onAuthStateChanged, User, signInWithEmailAndPassword, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, connectFirestoreEmulator, collection, doc, setDoc, getDoc, getDocs, query, where, onSnapshot, addDoc, updateDoc, deleteDoc, serverTimestamp, getDocFromServer } from 'firebase/firestore';
 
 // Import the Firebase configuration
@@ -19,7 +19,21 @@ export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
 // Auth Helpers
-export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
+googleProvider.setCustomParameters({ prompt: 'select_account' });
+
+// Popup first; if the browser blocks popups, fall back to a full-page redirect.
+export const signInWithGoogle = async () => {
+  try {
+    return await signInWithPopup(auth, googleProvider);
+  } catch (error: any) {
+    if (error?.code === 'auth/popup-blocked' || error?.code === 'auth/operation-not-supported-in-environment') {
+      return signInWithRedirect(auth, googleProvider);
+    }
+    throw error;
+  }
+};
+// Surfaces errors from a redirect sign-in when the page loads again.
+export const getGoogleRedirectResult = () => getRedirectResult(auth);
 export const loginWithEmail = (email: string, pass: string) => signInWithEmailAndPassword(auth, email, pass);
 export const registerWithEmail = (email: string, pass: string) => createUserWithEmailAndPassword(auth, email, pass);
 export const logout = () => signOut(auth);
