@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Bot, User, Sparkles, Minimize2, Maximize2, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { GoogleGenAI } from "@google/genai";
+import { ai } from '../services/geminiClient';
 import Markdown from 'react-markdown';
 
 interface Message {
@@ -17,8 +17,6 @@ interface ChatDrawerProps {
   onClose: () => void;
   user: any;
 }
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user }) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -58,13 +56,6 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
     setIsLoading(true);
 
     try {
-      const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
-        config: {
-          systemInstruction: "You are a world-class Wealth Coach and Financial Advisor. Your goal is to help users achieve financial freedom through habit formation, mindset shifts, and strategic planning. Be encouraging, data-driven, and practical. Use the principles of Atomic Habits and Zig Ziglar's goal setting. Keep responses concise and formatted with markdown for readability.",
-        },
-      });
-
       // Send all previous messages for context (simplified)
       const history = messages.map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
