@@ -57,7 +57,8 @@ export const gemini = onRequest(
       const result = await ai.models.generateContent({ model: MODEL, contents, config: safeConfig });
       res.json({ text: result.text ?? '' });
     } catch (err) {
-      logger.error('Gemini request failed', { uid, message: err?.message });
+      // Field names must not be `message`: the logger uses that key itself.
+      logger.error('Gemini request failed', { uid, errorMessage: err?.message, status: err?.status, name: err?.name });
       res.status(502).json({ error: 'AI service unavailable' });
     }
   }
