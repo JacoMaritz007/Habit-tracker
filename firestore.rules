@@ -90,7 +90,7 @@ service cloud.firestore {
         (
           (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
            get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin') ||
-          (request.auth.token.email == "jaco@stockcapital.co.za" && request.auth.token.email_verified == true)
+          (request.auth.token.email == "jaco@wealthu.org" && request.auth.token.email_verified == true)
         );
     }
 
@@ -217,6 +217,10 @@ service cloud.firestore {
       allow read: if isOwner(userId) || isAdmin();
       allow create: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == 'user' || isAdmin());
       allow update: if isOwner(userId) && isValidUser(request.resource.data) && (request.resource.data.role == resource.data.role || isAdmin());
+      // Admins can promote or demote other users, touching nothing but role.
+      allow update: if isAdmin() &&
+                       request.resource.data.diff(resource.data).affectedKeys().hasOnly(['role']) &&
+                       request.resource.data.role in ['user', 'admin'];
     }
 
     match /transactions/{transactionId} {

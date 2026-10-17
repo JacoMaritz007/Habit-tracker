@@ -120,7 +120,7 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
           >
             <div className="bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden flex flex-col md:flex-row flex-1">
               <div className="md:w-1/2 p-8 md:p-12 flex flex-col justify-center space-y-6">
-                <div className="inline-flex items-center gap-2 px-3 py-1 bg-brand-bg/10 text-brand-bg rounded-full text-[10px] font-bold uppercase tracking-widest">
+                <div className="inline-flex items-center gap-2 px-3 py-1 bg-primary/10 text-ink rounded-full text-[10px] font-bold uppercase tracking-widest">
                   <BrainCircuit size={12} />
                   The Psychology of Wealth
                 </div>
@@ -133,20 +133,20 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                 <div className="pt-4">
                   <button
                     onClick={nextStep}
-                    className="group px-8 py-4 bg-brand-bg text-white rounded-2xl font-bold text-lg hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/30 flex items-center gap-3"
+                    className="group px-8 py-4 bg-primary text-white rounded-full font-bold text-lg hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 flex items-center gap-3"
                   >
                     Next <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
                   </button>
                 </div>
               </div>
               <div className="md:w-1/2 bg-slate-50 relative overflow-hidden flex items-center justify-center p-12">
-                <div className="absolute inset-0 bg-gradient-to-br from-brand-bg/20 via-transparent to-brand-accent/20" />
+                <div className="absolute inset-0 bg-[radial-gradient(60%_55%_at_50%_0%,rgba(244,124,32,.14),transparent_70%)]" />
                 <div className="relative z-10 w-full aspect-square max-w-[300px]">
                   {/* Abstract Graphic Placeholder */}
-                  <div className="w-full h-full rounded-full border-4 border-dashed border-brand-bg/30 animate-spin-slow flex items-center justify-center">
+                  <div className="w-full h-full rounded-full border-4 border-dashed border-primary/30 animate-spin-slow flex items-center justify-center">
                     <div className="w-4/5 h-4/5 rounded-full border-4 border-dashed border-brand-accent/30 animate-reverse-spin-slow flex items-center justify-center">
-                      <div className="w-3/5 h-3/5 rounded-full bg-brand-bg/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl">
-                        <BrainCircuit size={64} className="text-brand-bg" />
+                      <div className="w-3/5 h-3/5 rounded-full bg-primary/10 backdrop-blur-xl border border-white/20 flex items-center justify-center shadow-2xl">
+                        <BrainCircuit size={64} className="text-ink" />
                       </div>
                     </div>
                   </div>
@@ -155,7 +155,7 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                 <motion.div 
                   animate={{ y: [0, -20, 0] }}
                   transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                  className="absolute top-1/4 left-1/4 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-brand-bg"
+                  className="absolute top-1/4 left-1/4 w-12 h-12 bg-white rounded-2xl shadow-xl flex items-center justify-center text-ink"
                 >
                   <Shield size={24} />
                 </motion.div>
@@ -195,13 +195,13 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                   className={cn(
                     "aspect-square rounded-xl border-2 transition-all flex flex-col items-center justify-center group",
                     selectedType === profile.id 
-                      ? "bg-brand-bg border-brand-bg text-white shadow-lg shadow-brand-bg/20 scale-105" 
-                      : "bg-white border-slate-100 text-slate-400 hover:border-brand-bg/30 hover:text-brand-bg"
+                      ? "bg-primary border-primary text-white shadow-lg shadow-primary/20 scale-105" 
+                      : "bg-white border-slate-100 text-slate-400 hover:border-primary/30 hover:text-primary-ink"
                   )}
                 >
                   <span className={cn(
                     "text-lg font-black leading-none",
-                    selectedType === profile.id ? "text-white" : "text-slate-900 group-hover:text-brand-bg"
+                    selectedType === profile.id ? "text-white" : "text-slate-900 group-hover:text-primary-ink"
                   )}>
                     {profile.id}
                   </span>
@@ -221,7 +221,7 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                     className="bg-white p-8 rounded-3xl border border-slate-200 shadow-lg w-full max-w-2xl"
                   >
                     <div className="flex items-center gap-4 mb-6">
-                      <div className="w-12 h-12 bg-brand-bg/10 text-brand-bg rounded-xl flex items-center justify-center">
+                      <div className="w-12 h-12 bg-primary/10 text-ink rounded-xl flex items-center justify-center">
                         {React.createElement(WEALTH_PROFILES[selectedType - 1].icon, { size: 24 })}
                       </div>
                       <div>
@@ -266,7 +266,7 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
               </button>
               <button
                 onClick={nextStep}
-                className="group px-8 py-4 bg-brand-bg text-white rounded-2xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/30 flex items-center gap-3"
+                className="group px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 flex items-center gap-3"
               >
                 Next <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
               </button>
@@ -307,7 +307,7 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                 <div className="space-y-4">
                   <button
                     onClick={handleCtaClick}
-                    className="w-full group px-8 py-5 bg-brand-bg text-white rounded-2xl font-bold text-lg hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/30 flex items-center justify-center gap-3"
+                    className="w-full group px-8 py-5 bg-primary text-white rounded-full font-bold text-lg hover:bg-primary-hover transition-all shadow-lg shadow-primary/30 flex items-center justify-center gap-3"
                   >
                     Take the Official Enneagram Test <ExternalLink size={20} />
                   </button>
@@ -325,11 +325,10 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                   </button>
                 </div>
               </div>
-              <div className="md:w-1/2 bg-brand-bg relative overflow-hidden flex items-center justify-center p-12">
-                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
+              <div className="md:w-1/2 brand-gradient relative overflow-hidden flex items-center justify-center p-12">
                 <div className="relative z-10 text-center space-y-6">
                   <div className="w-24 h-24 bg-white/10 backdrop-blur-xl rounded-3xl border border-white/20 flex items-center justify-center mx-auto shadow-2xl">
-                    <Target size={48} className="text-white" />
+                    <Target size={48} className="text-primary" />
                   </div>
                   <div className="space-y-2">
                     <h3 className="text-2xl font-bold text-white">Your Roadmap Awaits</h3>

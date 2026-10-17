@@ -206,10 +206,10 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
         return (
           <div className="space-y-8">
             <div className="bg-white p-8 rounded-2xl border border-slate-200 shadow-sm relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-brand-bg/5 rounded-full -mr-32 -mt-32 blur-3xl" />
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -mr-32 -mt-32 blur-3xl" />
               <div className="relative z-10">
                 <div className="flex items-center gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-brand-bg/10 text-brand-bg flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-xl bg-primary/10 text-ink flex items-center justify-center">
                     <Calculator size={24} />
                   </div>
                   <h3 className="text-2xl font-bold text-slate-900">Welcome to the Freedom Calculator</h3>
@@ -234,7 +234,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                 
                 <div className="p-6 bg-slate-50 rounded-xl border border-slate-200 mb-8">
                   <div className="flex items-start gap-3">
-                    <ShieldCheck className="text-brand-bg mt-1" size={20} />
+                    <ShieldCheck className="text-ink mt-1" size={20} />
                     <div>
                       <h4 className="font-bold text-slate-900 mb-1">Disclaimer</h4>
                       <p className="text-sm text-slate-500 leading-relaxed">
@@ -255,8 +255,8 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         className={cn(
                           "px-4 py-3 rounded-xl border text-sm font-bold transition-all",
                           localData.currency === curr.code
-                            ? "bg-brand-bg text-white border-brand-bg shadow-lg shadow-brand-bg/20"
-                            : "bg-white text-slate-600 border-slate-200 hover:border-brand-bg/50"
+                            ? "bg-primary text-white border-primary shadow-lg shadow-primary/20"
+                            : "bg-white text-slate-600 border-slate-200 hover:border-primary/50"
                         )}
                       >
                         {curr.code} ({curr.symbol})
@@ -271,7 +271,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <button
                 onClick={() => goToStep('step1')}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-8 py-4 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20 group disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 group disabled:opacity-50"
               >
                 {isSaving ? <RefreshCw className="animate-spin" size={20} /> : null}
                 Get Started
@@ -301,7 +301,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           type="number"
                           value={localData.monthlyEarnedIncome || ''}
                           onChange={(e) => updateField('monthlyEarnedIncome', Number(e.target.value))}
-                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-bg/20 focus:border-brand-bg outline-none transition-all font-bold"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-focus/30 focus:border-focus outline-none transition-all font-bold"
                           placeholder="0.00"
                         />
                       </div>
@@ -314,7 +314,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           type="number"
                           value={localData.monthlyPassiveIncome || ''}
                           onChange={(e) => updateField('monthlyPassiveIncome', Number(e.target.value))}
-                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-bg/20 focus:border-brand-bg outline-none transition-all font-bold text-emerald-600"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-focus/30 focus:border-focus outline-none transition-all font-bold text-emerald-600"
                           placeholder="0.00"
                         />
                       </div>
@@ -327,7 +327,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           type="number"
                           value={localData.monthlyExpenses || ''}
                           onChange={(e) => updateField('monthlyExpenses', Number(e.target.value))}
-                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-brand-bg/20 focus:border-brand-bg outline-none transition-all font-bold text-rose-600"
+                          className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-focus/30 focus:border-focus outline-none transition-all font-bold text-rose-600"
                           placeholder="0.00"
                         />
                       </div>
@@ -342,8 +342,8 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                             className={cn(
                               "py-2 rounded-lg border text-[10px] font-black uppercase tracking-widest transition-all",
                               localData.expenseBuffer === buffer.value
-                                ? "bg-brand-bg text-white border-brand-bg"
-                                : "bg-white text-slate-600 border-slate-200 hover:border-brand-bg/50"
+                                ? "bg-primary text-white border-primary"
+                                : "bg-white text-slate-600 border-slate-200 hover:border-primary/50"
                             )}
                           >
                             {buffer.label}
@@ -372,7 +372,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <div className="space-y-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                   <h4 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <Home size={20} className="text-brand-bg" />
+                    <Home size={20} className="text-ink" />
                     Balance Sheet
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -387,7 +387,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                               type="number"
                               value={(localData.assets as any)?.[key] || ''}
                               onChange={(e) => updateField(`assets.${key}`, Number(e.target.value))}
-                              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg transition-all"
+                              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus transition-all"
                             />
                           </div>
                         </div>
@@ -413,8 +413,8 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   </div>
                 </div>
 
-                <div className="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-brand-bg/20 rounded-full -mr-16 -mt-16 blur-2xl" />
+                <div className="brand-gradient p-6 rounded-2xl shadow-xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-2xl" />
                   <div className="relative z-10">
                     <p className="text-xs font-black text-white uppercase tracking-widest mb-1">Current Net Worth</p>
                     <p className={cn(
@@ -439,7 +439,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <button
                 onClick={() => goToStep('step2')}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-8 py-4 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20 group disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 group disabled:opacity-50"
               >
                 {isSaving ? <RefreshCw className="animate-spin" size={20} /> : null}
                 Next: Freedom Number
@@ -457,7 +457,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <h4 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                      <Target size={20} className="text-brand-bg" />
+                      <Target size={20} className="text-ink" />
                       Life Goals & Destinations
                     </h4>
                     <button
@@ -465,7 +465,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         const newGoal: FreedomGoal = { id: Math.random().toString(36).substr(2, 9), title: '', cost: 0 };
                         updateField('freedomGoals', [...(localData.freedomGoals || []), newGoal]);
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-brand-bg/10 text-brand-bg rounded-lg text-xs font-bold hover:bg-brand-bg/20 transition-all"
+                      className="flex items-center gap-2 px-4 py-2 bg-primary/10 text-ink rounded-lg text-xs font-bold hover:bg-primary/20 transition-all"
                     >
                       <Plus size={16} />
                       Add Goal
@@ -491,7 +491,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                               newGoals[index].title = e.target.value;
                               updateField('freedomGoals', newGoals);
                             }}
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                             placeholder="e.g. Children's University Fund"
                           />
                         </div>
@@ -507,7 +507,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                                 newGoals[index].cost = Number(e.target.value);
                                 updateField('freedomGoals', newGoals);
                               }}
-                              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                              className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                             />
                           </div>
                         </div>
@@ -538,7 +538,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           type="number"
                           value={localData.monthlyExpensesOverride !== undefined ? localData.monthlyExpensesOverride : (localData.monthlyExpenses || '')}
                           onChange={(e) => updateField('monthlyExpensesOverride', e.target.value === '' ? undefined : Number(e.target.value))}
-                          className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                          className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           placeholder={String(localData.monthlyExpenses || 0)}
                         />
                       </div>
@@ -552,7 +552,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           step="0.1"
                           value={Math.round((localData.inflationRate || 0.06) * 1000) / 10}
                           onChange={(e) => updateField('inflationRate', Number(e.target.value) / 100)}
-                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
                       </div>
@@ -565,7 +565,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           step="0.1"
                           value={Math.round((localData.withdrawalRate || 0.04) * 1000) / 10}
                           onChange={(e) => updateField('withdrawalRate', Number(e.target.value) / 100)}
-                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                          className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                         />
                         <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
                       </div>
@@ -574,10 +574,9 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   </div>
                 </div>
 
-                <div className="bg-brand-bg p-6 rounded-2xl border border-brand-bg shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-16 -mt-16 blur-2xl" />
+                <div className="brand-gradient p-6 rounded-2xl shadow-xl relative overflow-hidden">
                   <div className="relative z-10 text-white">
-                    <p className="text-xs font-black text-white uppercase tracking-widest mb-1">Total Freedom Number</p>
+                    <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">Total Freedom Number</p>
                     <p className="text-4xl font-bold tracking-tight">
                       {currencySymbol}{freedomNumber.toLocaleString()}
                     </p>
@@ -607,7 +606,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <button
                 onClick={() => goToStep('step3')}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-8 py-4 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20 group disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 group disabled:opacity-50"
               >
                 {isSaving ? <RefreshCw className="animate-spin" size={20} /> : null}
                 Next: Wealth Plan
@@ -624,7 +623,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <div className="lg:col-span-2 space-y-6">
                 <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm">
                   <h4 className="text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                    <TrendingUp size={20} className="text-brand-bg" />
+                    <TrendingUp size={20} className="text-ink" />
                     Projection Parameters
                   </h4>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -637,7 +636,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                             type="number"
                             value={localData.startingCapital ?? netWorth}
                             onChange={(e) => updateField('startingCapital', Number(e.target.value))}
-                            className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                            className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           />
                         </div>
                         <p className="text-[10px] text-slate-400 mt-1">Defaults to your current Net Worth</p>
@@ -650,7 +649,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                             type="number"
                             value={localData.monthlyInvestment || ''}
                             onChange={(e) => updateField('monthlyInvestment', Number(e.target.value))}
-                            className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                            className="w-full pl-8 pr-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           />
                         </div>
                       </div>
@@ -662,7 +661,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                             step="0.1"
                             value={(localData.annualIncrease || 0.05) * 100}
                             onChange={(e) => updateField('annualIncrease', Number(e.target.value) / 100)}
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
                         </div>
@@ -677,7 +676,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                             step="0.1"
                             value={(localData.targetIrr || 0.12) * 100}
                             onChange={(e) => updateField('targetIrr', Number(e.target.value) / 100)}
-                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-brand-bg"
+                            className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           />
                           <span className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">%</span>
                         </div>
@@ -690,11 +689,11 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           max="40"
                           value={localData.timelineYears || 20}
                           onChange={(e) => updateField('timelineYears', Number(e.target.value))}
-                          className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-brand-bg mt-4"
+                          className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-primary mt-4"
                         />
                         <div className="flex justify-between mt-2">
                           <span className="text-[10px] font-bold text-slate-400">1 Year</span>
-                          <span className="text-sm font-bold text-brand-bg">{localData.timelineYears || 20} Years</span>
+                          <span className="text-sm font-bold text-ink">{localData.timelineYears || 20} Years</span>
                           <span className="text-[10px] font-bold text-slate-400">40 Years</span>
                         </div>
                       </div>
@@ -707,7 +706,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                     <h4 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Growth Projection (30 Year Horizon)</h4>
                     <div className="flex items-center gap-4">
                       <div className="flex items-center gap-2">
-                        <div className="w-3 h-3 bg-brand-bg rounded-full" />
+                        <div className="w-3 h-3 bg-primary rounded-full" />
                         <span className="text-[10px] font-bold text-slate-500 uppercase">Projected Wealth</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -721,16 +720,16 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       <AreaChart data={projections} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                         <defs>
                           <linearGradient id="colorBalance" x1="0" y1="0" x2="0" y2="1">
-                            <stop offset="5%" stopColor="#2563eb" stopOpacity={0.3}/>
-                            <stop offset="95%" stopColor="#2563eb" stopOpacity={0}/>
+                            <stop offset="5%" stopColor="#0077B6" stopOpacity={0.3}/>
+                            <stop offset="95%" stopColor="#0077B6" stopOpacity={0}/>
                           </linearGradient>
                         </defs>
-                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F4F6F8" />
                         <XAxis 
                           dataKey="year" 
                           axisLine={false}
                           tickLine={false}
-                          tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }}
+                          tick={{ fontSize: 10, fontWeight: 700, fill: '#7B8794' }}
                           ticks={[0, 5, 10, 20, 30]}
                         />
                         <YAxis 
@@ -741,7 +740,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           content={({ active, payload, label }) => {
                             if (active && payload && payload.length) {
                               return (
-                                <div className="bg-slate-900 text-white p-3 rounded-xl border border-slate-800 shadow-xl">
+                                <div className="bg-ink text-white p-3 rounded-xl border border-slate-700 shadow-xl">
                                   <p className="text-[10px] font-black uppercase tracking-widest text-white mb-2">Year {label}</p>
                                   <div className="space-y-1">
                                     <p className="text-sm font-bold flex justify-between gap-4">
@@ -762,7 +761,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         <Area 
                           type="monotone" 
                           dataKey="balance" 
-                          stroke="#2563eb" 
+                          stroke="#0077B6" 
                           strokeWidth={3}
                           fillOpacity={1} 
                           fill="url(#colorBalance)" 
@@ -771,7 +770,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         <Area 
                           type="monotone" 
                           dataKey="freedomNumber" 
-                          stroke="#fb7185" 
+                          stroke="#D93F3F" 
                           strokeWidth={2}
                           strokeDasharray="5 5"
                           fill="transparent"
@@ -779,12 +778,12 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         />
                         <ReferenceLine 
                           x={localData.timelineYears || 20} 
-                          stroke="#2563eb" 
+                          stroke="#0077B6" 
                           strokeDasharray="3 3"
                           label={{ 
                             position: 'top', 
                             value: 'Your Target', 
-                            fill: '#2563eb', 
+                            fill: '#0077B6', 
                             fontSize: 10, 
                             fontWeight: 900 
                           }} 
@@ -849,7 +848,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <button
                 onClick={() => goToStep('step4')}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-8 py-4 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20 group disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 group disabled:opacity-50"
               >
                 {isSaving ? <RefreshCw className="animate-spin" size={20} /> : null}
                 Next: Dashboard
@@ -876,7 +875,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       strokeWidth="8"
                       strokeDasharray={351.8}
                       strokeDashoffset={351.8 * (1 - Math.min(1, freedomRatio))}
-                      className="text-brand-bg"
+                      className="text-ink"
                     />
                   </svg>
                   <span className="text-2xl font-bold text-slate-900">{Math.round(freedomRatio * 100)}%</span>
@@ -939,7 +938,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               </div>
             </div>
 
-            <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 shadow-xl">
+            <div className="brand-gradient p-8 rounded-2xl shadow-xl">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
                   <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Net Worth</p>
@@ -955,7 +954,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                 </div>
                 <div>
                   <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Time to Freedom</p>
-                  <p className="text-2xl font-bold text-brand-bg">{localData.timelineYears || 20} Years</p>
+                  <p className="text-2xl font-bold text-ink">{localData.timelineYears || 20} Years</p>
                 </div>
               </div>
             </div>
@@ -971,7 +970,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               <button
                 onClick={() => goToStep('step5')}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-8 py-4 bg-brand-bg text-white rounded-xl font-bold hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20 group disabled:opacity-50"
+                className="flex items-center gap-2 px-8 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 group disabled:opacity-50"
               >
                 {isSaving ? <RefreshCw className="animate-spin" size={20} /> : null}
                 Next: Wealth Rhythm
@@ -997,7 +996,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         type="checkbox"
                         checked={localData.rhythmStatus?.monthly || false}
                         onChange={(e) => updateField('rhythmStatus.monthly', e.target.checked)}
-                        className="w-6 h-6 rounded-lg border-slate-300 text-brand-bg focus:ring-brand-bg mt-1"
+                        className="w-6 h-6 rounded-lg border-slate-300 text-ink focus:ring-focus/30 mt-1"
                       />
                       <div>
                         <p className="font-bold text-slate-900">Monthly Check-in</p>
@@ -1009,7 +1008,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         type="checkbox"
                         checked={localData.rhythmStatus?.quarterly || false}
                         onChange={(e) => updateField('rhythmStatus.quarterly', e.target.checked)}
-                        className="w-6 h-6 rounded-lg border-slate-300 text-brand-bg focus:ring-brand-bg mt-1"
+                        className="w-6 h-6 rounded-lg border-slate-300 text-ink focus:ring-focus/30 mt-1"
                       />
                       <div>
                         <p className="font-bold text-slate-900">Quarterly Audit</p>
@@ -1021,7 +1020,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         type="checkbox"
                         checked={localData.rhythmStatus?.annually || false}
                         onChange={(e) => updateField('rhythmStatus.annually', e.target.checked)}
-                        className="w-6 h-6 rounded-lg border-slate-300 text-brand-bg focus:ring-brand-bg mt-1"
+                        className="w-6 h-6 rounded-lg border-slate-300 text-ink focus:ring-focus/30 mt-1"
                       />
                       <div>
                         <p className="font-bold text-slate-900">Annual Review</p>
@@ -1033,11 +1032,10 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
               </div>
 
               <div className="space-y-6">
-                <div className="bg-gradient-to-br from-brand-bg to-brand-bg/80 p-8 rounded-2xl text-white shadow-xl relative overflow-hidden">
-                  <div className="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -mr-32 -mt-32 blur-3xl" />
+                <div className="brand-gradient p-8 rounded-2xl text-white shadow-xl relative overflow-hidden">
                   <div className="relative z-10">
-                    <Sparkles className="mb-4" size={32} />
-                    <h4 className="text-2xl font-bold mb-4">Expert Eyes on Your Plan</h4>
+                    <Sparkles className="mb-4 text-primary" size={32} />
+                    <h4 className="text-2xl font-bold mb-4 text-white">Expert Eyes on Your Plan</h4>
                     <p className="text-white/80 leading-relaxed mb-8">
                       Once you've completed your Freedom Calculator, book a no-obligation FREE 1-hour chat with one of our Wealth Coaches.
                     </p>
@@ -1046,7 +1044,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         href="https://diversifiedpassiveincome.com/call"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between w-full px-6 py-4 bg-white text-brand-bg rounded-xl font-bold hover:bg-slate-50 transition-all group"
+                        className="flex items-center justify-between w-full px-6 py-4 bg-primary text-white rounded-full font-bold hover:bg-primary-hover shadow-[0_8px_22px_rgba(244,124,32,.32)] transition-all group"
                       >
                         Book Discovery Call
                         <ExternalLink size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -1055,7 +1053,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         href="https://www.skool.com/wealthuniversity/about"
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="flex items-center justify-between w-full px-6 py-4 bg-white/10 text-white border border-white/20 rounded-xl font-bold hover:bg-white/20 transition-all group"
+                        className="flex items-center justify-between w-full px-6 py-4 bg-white/10 text-white border border-white/20 rounded-full font-bold hover:bg-white/20 transition-all group"
                       >
                         Join Wealth University
                         <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform" />
@@ -1110,7 +1108,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                 className={cn(
                   "flex items-center gap-2 px-4 py-2 rounded-xl transition-all whitespace-nowrap",
                   isActive 
-                    ? "bg-brand-bg text-white font-bold shadow-md"
+                    ? "bg-primary text-white font-bold shadow-md"
                     : "bg-white text-slate-500 hover:bg-slate-50 border border-slate-200"
                 )}
               >

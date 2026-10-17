@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Bell, LogOut, MessageSquare, Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, query, where, onSnapshot, doc, setDoc, addDoc, deleteDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, serverTimestamp, increment } from 'firebase/firestore';
 import { auth, db, logout, handleFirestoreError, OperationType } from './firebase';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
@@ -17,6 +17,8 @@ import { TransactionModal } from './components/TransactionModal';
 import { HabitModal } from './components/HabitModal';
 import { GoalModal } from './components/GoalModal';
 import { ChatDrawer } from './components/ChatDrawer';
+import { Admin } from './components/Admin';
+import { isAdminUser } from './lib/admin';
 import { cn } from './lib/utils';
 import { 
   Transaction, 
@@ -62,17 +64,33 @@ export default function App() {
       setIsAuthReady(true);
       
       if (currentUser) {
-        // Ensure user document exists
+        // Create the profile on first sign-in; afterwards only refresh identity
+        // fields so role, createdAt and progress are never overwritten.
+        // Null fields are omitted: email/password accounts have no displayName
+        // or photoURL, and the rules only accept strings there.
         const userDocRef = doc(db, 'users', currentUser.uid);
-        try {
-          await setDoc(userDocRef, {
+        const identity = Object.fromEntries(
+          Object.entries({
             uid: currentUser.uid,
             email: currentUser.email,
             displayName: currentUser.displayName,
             photoURL: currentUser.photoURL,
-            role: 'user',
-            createdAt: serverTimestamp()
-          }, { merge: true });
+          }).filter(([, value]) => value != null)
+        );
+        try {
+          const existing = await getDoc(userDocRef);
+          if (existing.exists()) {
+            await setDoc(userDocRef, identity, { merge: true });
+          } else {
+            await setDoc(userDocRef, {
+              ...identity,
+              role: 'user',
+              xp: 0,
+              level: 1,
+              badges: [],
+              createdAt: serverTimestamp()
+            });
+          }
         } catch (error) {
           handleFirestoreError(error, OperationType.WRITE, `users/${currentUser.uid}`);
         }
@@ -390,7 +408,8 @@ export default function App() {
     const oldLevel = calculateLevel(userProfile.xp || 0);
     const newLevel = calculateLevel(newXP);
     
-    const updateData: any = { xp: newXP };
+    // increment() so two quick awards can't overwrite each other.
+    const updateData: any = { xp: increment(amount) };
     if (newLevel > oldLevel) {
       updateData.level = newLevel;
       // Level up logic could go here (notifications etc)
@@ -467,10 +486,12 @@ export default function App() {
     }
   };
 
+  const isAdmin = isAdminUser(user, userProfile);
+
   if (!isAuthReady) {
     return (
-      <div className="h-screen flex items-center justify-center bg-[#F8FAFC]">
-        <div className="w-12 h-12 border-4 border-brand-primary border-t-transparent rounded-full animate-spin"></div>
+      <div className="h-screen flex items-center justify-center bg-slate-50">
+        <div className="w-12 h-12 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
@@ -481,7 +502,7 @@ export default function App() {
 
   return (
     <ErrorBoundary>
-      <div className="flex h-screen bg-[#F8FAFC] text-slate-900 font-sans overflow-hidden">
+      <div className="flex h-screen bg-slate-50 text-slate-900 font-sans overflow-hidden">
         {/* Mobile Sidebar Overlay */}
         <AnimatePresence>
           {isSidebarOpen && (
@@ -508,6 +529,7 @@ export default function App() {
             }} 
             onClose={() => setIsSidebarOpen(false)}
             userProfile={userProfile}
+            isAdmin={isAdmin}
           />
         </div>
 
@@ -516,7 +538,7 @@ export default function App() {
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => setIsSidebarOpen(true)}
-                className="p-2 text-slate-500 hover:text-brand-bg lg:hidden"
+                className="p-2 text-slate-500 hover:text-primary-ink lg:hidden"
               >
                 <Menu size={24} />
               </button>
@@ -527,7 +549,7 @@ export default function App() {
             <div className="flex items-center gap-4">
               <button 
                 onClick={() => setIsChatOpen(true)}
-                className="p-2 text-slate-400 hover:text-brand-bg transition-colors relative group"
+                className="p-2 text-slate-400 hover:text-primary-ink transition-colors relative group"
                 title="AI Wealth Coach"
               >
                 <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
@@ -671,6 +693,17 @@ export default function App() {
                     onSuggestAdvice={handleSuggestAdvice}
                     onSuggestMoneyStoryAdvice={handleSuggestMoneyStoryAdvice}
                   />
+                </motion.div>
+              )}
+              {activeTab === 'admin' && isAdmin && (
+                <motion.div 
+                  key="admin"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="space-y-8"
+                >
+                  <Admin currentUid={user.uid} />
                 </motion.div>
               )}
               {activeTab === 'account' && (

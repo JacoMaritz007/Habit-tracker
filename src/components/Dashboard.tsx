@@ -62,7 +62,7 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
         </div>
         <div className="lg:col-span-2 bg-white rounded-3xl border border-slate-200 p-6 shadow-sm">
           <div className="flex items-center gap-2 mb-6">
-            <LayoutGrid className="text-brand-bg" size={20} />
+            <LayoutGrid className="text-ink" size={20} />
             <h3 className="text-lg font-bold text-slate-900">Achievements Unlocked</h3>
           </div>
           <BadgesGrid unlockedBadgeIds={userProfile?.badges || []} />
@@ -89,15 +89,15 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
               {chartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E2E8F0" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#64748B' }} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E1E6EB" />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#7B8794' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#7B8794' }} />
                     <Tooltip 
-                      cursor={{ fill: '#F1F5F9' }}
+                      cursor={{ fill: '#F4F6F8' }}
                       contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
                       formatter={(value: number) => [formatCurrency(value, currency), 'Amount']}
                     />
-                    <Bar dataKey="value" fill="#2a4661" radius={[4, 4, 0, 0]} barSize={40} />
+                    <Bar dataKey="value" fill="#F47C20" radius={[4, 4, 0, 0]} barSize={40} />
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -162,8 +162,8 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
               </div>
             ) : insights.length > 0 ? (
               insights.map((insight, i) => (
-                <div key={i} className="p-4 bg-brand-bg/5 rounded-xl border border-brand-bg/10">
-                  <p className="text-sm text-brand-bg leading-relaxed">{insight}</p>
+                <div key={i} className="p-4 bg-primary/5 rounded-xl border border-primary/10">
+                  <p className="text-sm text-ink leading-relaxed">{insight}</p>
                 </div>
               ))
             ) : (

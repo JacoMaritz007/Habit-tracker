@@ -99,7 +99,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
         wealthChallenge,
         enneagramType,
         currency,
-        photoAnalysis: analysisResult,
+        ...(analysisResult ? { photoAnalysis: analysisResult } : {}),
       });
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
@@ -115,24 +115,22 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
     if (!file) return;
 
     setIsAnalyzing(true);
-    try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
+    const reader = new FileReader();
+    reader.onloadend = async () => {
+      try {
         const base64String = (reader.result as string).split(',')[1];
         const result = await analyzeProfilePhoto(base64String, file.type);
         setAnalysisResult(result);
-        // Auto-save the analysis
-        await updateUserProfile({
-          ...userProfile,
-          photoAnalysis: result
-        });
-      };
-      reader.readAsDataURL(file);
-    } catch (error) {
-      console.error('Error analyzing photo:', error);
-    } finally {
-      setIsAnalyzing(false);
-    }
+        // Auto-save just the analysis; spreading the cached profile could
+        // overwrite newer XP or badges.
+        await updateUserProfile({ photoAnalysis: result });
+      } catch (error) {
+        console.error('Error analyzing photo:', error);
+      } finally {
+        setIsAnalyzing(false);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
@@ -158,12 +156,12 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
             {user?.photoURL ? (
               <img src={user.photoURL} alt="Profile" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-brand-bg text-white text-3xl font-bold">
+              <div className="w-full h-full flex items-center justify-center bg-primary text-white text-3xl font-bold">
                 {displayName.charAt(0) || user?.email?.charAt(0) || 'U'}
               </div>
             )}
           </div>
-          <label className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-slate-100 text-slate-600 hover:text-brand-bg transition-colors cursor-pointer">
+          <label className="absolute bottom-0 right-0 p-2 bg-white rounded-full shadow-lg border border-slate-100 text-slate-600 hover:text-primary-ink transition-colors cursor-pointer">
             <Camera size={16} />
             <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
           </label>
@@ -206,7 +204,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
           onClick={() => setActiveTab('profile')}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all",
-            activeTab === 'profile' ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+            activeTab === 'profile' ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
           <User size={18} /> Profile
@@ -215,7 +213,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
           onClick={() => setActiveTab('wealth')}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all",
-            activeTab === 'wealth' ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+            activeTab === 'wealth' ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
           <Coins size={18} /> Wealth Info
@@ -224,7 +222,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
           onClick={() => setActiveTab('security')}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all",
-            activeTab === 'security' ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+            activeTab === 'security' ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
           <Shield size={18} /> Security
@@ -233,7 +231,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
           onClick={() => setActiveTab('preferences')}
           className={cn(
             "flex-1 flex items-center justify-center gap-2 py-3 rounded-xl text-sm font-bold transition-all",
-            activeTab === 'preferences' ? "bg-white text-brand-bg shadow-sm" : "text-slate-500 hover:text-slate-700"
+            activeTab === 'preferences' ? "bg-white text-ink shadow-sm" : "text-slate-500 hover:text-slate-700"
           )}
         >
           <Globe size={18} /> Preferences
@@ -261,7 +259,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                       type="text"
                       value={displayName}
                       onChange={(e) => setDisplayName(e.target.value)}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                       placeholder="Enter your name"
                     />
                   </div>
@@ -271,7 +269,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                       value={bio}
                       onChange={(e) => setBio(e.target.value)}
                       rows={4}
-                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all resize-none"
+                      className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all resize-none"
                       placeholder="A short description about yourself and your wealth goals..."
                     />
                     <p className="text-[10px] text-slate-400 mt-2">This helps personalise your experience.</p>
@@ -289,13 +287,13 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                 
                 {isAnalyzing ? (
                   <div className="flex flex-col items-center justify-center p-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200 space-y-4">
-                    <Loader2 className="w-8 h-8 text-brand-bg animate-spin" />
+                    <Loader2 className="w-8 h-8 text-ink animate-spin" />
                     <p className="text-sm text-slate-500 font-medium">Analyzing your wealth persona...</p>
                   </div>
                 ) : analysisResult ? (
                   <div className="space-y-6 animate-in fade-in slide-in-from-right-4">
-                    <div className="p-6 bg-brand-bg/5 rounded-3xl border border-brand-bg/10">
-                      <h4 className="text-sm font-bold text-brand-bg uppercase tracking-widest mb-2">Wealth Persona</h4>
+                    <div className="p-6 bg-primary/5 rounded-3xl border border-primary/10">
+                      <h4 className="text-sm font-bold text-ink uppercase tracking-widest mb-2">Wealth Persona</h4>
                       <p className="text-xl font-bold text-slate-900 mb-3">{analysisResult.persona}</p>
                       <p className="text-sm text-slate-600 leading-relaxed italic">"{analysisResult.analysis}"</p>
                     </div>
@@ -316,7 +314,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                   <div className="flex flex-col items-center justify-center p-12 bg-slate-50 rounded-3xl border border-dashed border-slate-200 text-center">
                     <Camera className="w-12 h-12 text-slate-300 mb-4" />
                     <p className="text-sm text-slate-500 font-medium mb-4">Upload a photo to get an AI analysis of your personal wealth brand.</p>
-                    <label className="px-6 py-2 bg-brand-bg text-white rounded-xl text-xs font-bold hover:bg-brand-bg/90 transition-all cursor-pointer">
+                    <label className="px-6 py-2 bg-primary text-white rounded-full text-xs font-bold hover:bg-primary-hover transition-all cursor-pointer">
                       Upload Photo
                       <input type="file" className="hidden" accept="image/*" onChange={handlePhotoUpload} />
                     </label>
@@ -342,7 +340,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                   <select
                     value={incomeRange}
                     onChange={(e) => setIncomeRange(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all appearance-none"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all appearance-none"
                   >
                     {incomeRanges.map(range => <option key={range} value={range}>{range}</option>)}
                   </select>
@@ -353,7 +351,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                     value={primaryGoal}
                     onChange={(e) => setPrimaryGoal(e.target.value)}
                     rows={3}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all resize-none"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all resize-none"
                     placeholder="e.g. Build a 6-month emergency fund, pay off debt, invest $500/month..."
                   />
                 </div>
@@ -362,7 +360,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                   <select
                     value={wealthChallenge}
                     onChange={(e) => setWealthChallenge(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all appearance-none"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all appearance-none"
                   >
                     {wealthChallenges.map(challenge => <option key={challenge} value={challenge}>{challenge}</option>)}
                   </select>
@@ -372,12 +370,12 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                   <select
                     value={enneagramType}
                     onChange={(e) => setEnneagramType(e.target.value)}
-                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all appearance-none"
+                    className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all appearance-none"
                   >
                     {enneagramTypes.map(type => <option key={type} value={type}>{type}</option>)}
                   </select>
                   <p className="text-[10px] text-slate-400 mt-2">
-                    Don't know yours? <button type="button" className="text-brand-bg hover:underline">Take the Wealth Enneagram Test</button>
+                    Don't know yours? <button type="button" className="text-ink hover:underline">Take the Wealth Enneagram Test</button>
                   </p>
                 </div>
               </div>
@@ -463,7 +461,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                         className={cn(
                           "p-4 rounded-2xl border-2 transition-all text-left",
                           currency === curr.code 
-                            ? "border-brand-bg bg-brand-bg/5" 
+                            ? "border-primary bg-primary/5" 
                             : "border-slate-100 hover:border-slate-200 bg-slate-50"
                         )}
                       >
@@ -492,7 +490,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
               <button
                 type="submit"
                 disabled={isSaving}
-                className="px-8 py-3 bg-brand-bg text-white rounded-2xl font-bold hover:bg-brand-bg/90 transition-all flex items-center gap-2 shadow-xl shadow-brand-bg/20 disabled:opacity-50"
+                className="px-8 py-3 bg-primary text-white rounded-full font-bold hover:bg-primary-hover transition-all flex items-center gap-2 shadow-xl shadow-primary/20 disabled:opacity-50"
               >
                 {isSaving ? (
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>

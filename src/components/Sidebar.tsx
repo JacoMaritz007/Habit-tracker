@@ -5,11 +5,11 @@ import {
   Target, 
   BrainCircuit, 
   UserCircle, 
-  Wallet,
   ChevronRight,
   Calculator,
   X,
-  Trophy
+  Trophy,
+  ShieldCheck
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProgressIndicator } from './ProgressIndicator';
@@ -19,13 +19,13 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }
     <button
       onClick={onClick}
       className={cn(
-        "w-full flex items-center gap-3 px-4 py-2.5 rounded-lg transition-all duration-200 text-sm font-medium",
+        "w-full flex items-center gap-3 px-3 h-10 rounded-xl transition-all duration-200 text-sm",
         active 
-          ? "bg-brand-bg/10 text-brand-bg" 
-          : "text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+          ? "bg-primary-soft text-primary-ink font-semibold" 
+          : "text-slate-600 font-medium hover:bg-slate-100 hover:text-ink"
       )}
     >
-      <Icon size={18} className={active ? "text-brand-bg" : "text-slate-400"} />
+      <Icon size={18} className={active ? "text-primary-ink" : "text-slate-400"} />
       <span className="flex-1 text-left">{label}</span>
       {subItems && <ChevronRight size={14} className={cn("transition-transform", active && "rotate-90")} />}
     </button>
@@ -40,8 +40,8 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }
               className={cn(
                 "w-full text-left px-3 py-1.5 text-xs transition-colors",
                 isSubActive 
-                  ? "text-brand-bg font-bold" 
-                  : "text-slate-500 hover:text-brand-bg"
+                  ? "text-primary-ink font-bold" 
+                  : "text-slate-500 hover:text-ink"
               )}
             >
               {item.label}
@@ -53,15 +53,15 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }
   </div>
 );
 
-export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile }: { activeTab: string, setActiveTab: (t: string) => void, onClose?: () => void, userProfile?: any }) => {
+export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin }: { activeTab: string, setActiveTab: (t: string) => void, onClose?: () => void, userProfile?: any, isAdmin?: boolean }) => {
   return (
     <aside className="w-full h-full border-r border-slate-200 bg-white flex flex-col">
       <div className="p-6 flex items-center justify-between border-b border-slate-100">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-brand-bg rounded-lg flex items-center justify-center">
-            <Wallet className="text-white" size={18} />
-          </div>
-          <h1 className="font-bold text-lg text-brand-bg tracking-tight">Wealth Habits</h1>
+        <div className="flex flex-col gap-1.5">
+          <h1>
+            <img src="/brand/wealthos-logo-black.png" alt="WealthOS" className="h-5 w-auto" />
+          </h1>
+          <p className="wh-label !text-[10px]">Wealth Habits</p>
         </div>
         {onClose && (
           <button 
@@ -126,13 +126,25 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile }: { act
           onClick={() => setActiveTab('account')} 
           activeTab={activeTab}
         />
+        {isAdmin && (
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <p className="wh-label px-3 mb-2 !text-[10px]">Admin</p>
+            <SidebarItem 
+              icon={ShieldCheck} 
+              label="Members" 
+              active={activeTab === 'admin'} 
+              onClick={() => setActiveTab('admin')} 
+              activeTab={activeTab}
+            />
+          </div>
+        )}
       </nav>
 
       <div className="p-4 border-t border-slate-100">
-        <div className="bg-brand-accent/10 rounded-xl p-4 border border-brand-accent/20">
-          <h3 className="text-sm font-bold text-brand-bg mb-1">Need Help?</h3>
-          <p className="text-xs text-slate-600 mb-3">Our support team is here to assist you with any questions.</p>
-          <button className="w-full py-2 bg-brand-accent hover:bg-brand-accent/90 text-white text-xs font-bold rounded-lg transition-colors">
+        <div className="brand-gradient rounded-2xl p-4">
+          <h3 className="text-sm font-bold text-white mb-1">Need Help?</h3>
+          <p className="text-xs text-white/70 mb-3">Our support team is here to assist you with any questions.</p>
+          <button className="wh-btn wh-btn--primary wh-btn--sm wh-btn--block">
             Contact Support
           </button>
         </div>

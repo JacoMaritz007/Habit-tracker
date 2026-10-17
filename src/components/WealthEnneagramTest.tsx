@@ -93,17 +93,17 @@ export const WealthEnneagramTest = ({ onComplete }: { onComplete: (typeId: numbe
           
           <div className="bg-slate-50/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-slate-100 shadow-inner text-left">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-8 h-8 bg-brand-bg text-white rounded-lg flex items-center justify-center font-bold text-base shadow-lg shadow-brand-bg/20">
+              <div className="w-8 h-8 bg-primary text-white rounded-lg flex items-center justify-center font-bold text-base shadow-lg shadow-primary/20">
                 {resultType?.id}
               </div>
-              <h3 className="text-xl font-bold text-brand-bg tracking-tight">{resultType?.title}</h3>
+              <h3 className="text-xl font-bold text-ink tracking-tight">{resultType?.title}</h3>
             </div>
             <p className="text-sm text-slate-600 leading-relaxed">{resultType?.description}</p>
           </div>
 
           <button
             onClick={() => onComplete(resultId)}
-            className="w-full py-4 bg-brand-bg text-white rounded-xl font-bold text-base hover:bg-brand-bg/90 transition-all shadow-lg shadow-brand-bg/20 flex items-center justify-center gap-2"
+            className="w-full py-4 bg-primary text-white rounded-full font-bold text-base hover:bg-primary-hover transition-all shadow-lg shadow-primary/20 flex items-center justify-center gap-2"
           >
             Save Result & Continue <ArrowRight size={18} />
           </button>
@@ -117,14 +117,14 @@ export const WealthEnneagramTest = ({ onComplete }: { onComplete: (typeId: numbe
       <div className="mb-8">
         <div className="flex justify-between items-end mb-3">
           <div>
-            <span className="text-[10px] font-black text-brand-bg uppercase tracking-[0.2em] mb-1 block">Wealth Enneagram Test</span>
+            <span className="text-[10px] font-black text-ink uppercase tracking-[0.2em] mb-1 block">Wealth Enneagram Test</span>
             <h2 className="text-2xl font-bold text-slate-900 tracking-tight">Question {currentStep + 1} of {QUESTIONS.length}</h2>
           </div>
-          <span className="text-lg font-black text-brand-bg">{Math.round(progress)}%</span>
+          <span className="text-lg font-black text-ink">{Math.round(progress)}%</span>
         </div>
         <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden shadow-inner">
           <motion.div 
-            className="h-full bg-brand-bg"
+            className="h-full bg-primary"
             initial={{ width: 0 }}
             animate={{ width: `${progress}%` }}
           />
@@ -153,8 +153,8 @@ export const WealthEnneagramTest = ({ onComplete }: { onComplete: (typeId: numbe
                 className={cn(
                   "w-full p-4 rounded-xl text-left text-sm font-bold transition-all border-2",
                   answers[QUESTIONS[currentStep].id] === opt.value
-                    ? "bg-brand-bg text-white border-brand-bg shadow-lg shadow-brand-bg/20 scale-[1.01]"
-                    : "bg-slate-50/50 text-slate-600 border-slate-100 hover:border-brand-bg/30 hover:bg-white hover:shadow-md"
+                    ? "bg-primary text-white border-primary shadow-lg shadow-primary/20 scale-[1.01]"
+                    : "bg-slate-50/50 text-slate-600 border-slate-100 hover:border-primary/30 hover:bg-white hover:shadow-md"
                 )}
               >
                 {opt.label}
@@ -173,7 +173,7 @@ export const WealthEnneagramTest = ({ onComplete }: { onComplete: (typeId: numbe
           <ArrowLeft size={18} /> Back
         </button>
         <div className="flex items-center gap-2 text-slate-400 bg-slate-50 px-4 py-2 rounded-xl border border-slate-100">
-          <BrainCircuit size={16} className="text-brand-bg animate-pulse" />
+          <BrainCircuit size={16} className="text-ink animate-pulse" />
           <span className="text-[10px] font-black uppercase tracking-[0.15em]">Analyzing Patterns...</span>
         </div>
       </div>

@@ -29,7 +29,7 @@ export const Goals = ({ goals, onAddGoal, onEditGoal, onAddGoalDirect, onDeleteG
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
           <div className="flex items-center gap-3 mb-4">
-            <div className="p-2 bg-brand-bg/10 text-brand-bg rounded-lg"><Target size={20} /></div>
+            <div className="p-2 bg-primary/10 text-ink rounded-lg"><Target size={20} /></div>
             <h3 className="text-lg font-bold text-slate-900">Why Set Financial Goals?</h3>
           </div>
           <div className="space-y-4">
@@ -80,7 +80,7 @@ export const Goals = ({ goals, onAddGoal, onEditGoal, onAddGoalDirect, onDeleteG
               onClick={() => setActivePlan(plan.id)}
               className={cn(
                 "px-4 py-2 text-sm font-medium transition-colors rounded-lg",
-                activePlan === plan.id ? "bg-brand-bg text-white" : "text-slate-600 hover:text-brand-bg hover:bg-slate-50"
+                activePlan === plan.id ? "bg-primary text-white" : "text-slate-600 hover:text-primary-ink hover:bg-slate-50"
               )}
             >
               {plan.label}
@@ -89,7 +89,7 @@ export const Goals = ({ goals, onAddGoal, onEditGoal, onAddGoalDirect, onDeleteG
         </div>
         <button 
           onClick={onAddGoal}
-          className="flex items-center gap-2 px-4 py-2 bg-brand-bg text-white rounded-xl text-sm font-bold hover:bg-brand-bg/90 transition-colors shadow-lg shadow-brand-bg/20"
+          className="flex items-center gap-2 px-4 py-2 bg-primary text-white rounded-full text-sm font-bold hover:bg-primary-hover transition-colors shadow-lg shadow-primary/20"
         >
           <Plus size={18} /> Add New Goal
         </button>
@@ -108,14 +108,14 @@ export const Goals = ({ goals, onAddGoal, onEditGoal, onAddGoalDirect, onDeleteG
                 </div>
                 <div className="w-full h-2 bg-slate-100 rounded-full mb-2 overflow-hidden">
                   <div 
-                    className="h-full bg-brand-bg rounded-full transition-all duration-1000" 
+                    className="h-full bg-primary rounded-full transition-all duration-1000" 
                     style={{ width: `${Math.min(100, (goal.currentAmount / goal.targetAmount) * 100)}%` }}
                   />
                 </div>
                 <div className="flex justify-between text-xs font-medium mb-6">
                   <span className="text-slate-400">{formatCurrency(goal.currentAmount, currency)}</span>
                   <span className="text-slate-400">{formatCurrency(goal.targetAmount, currency)}</span>
-                  <span className="text-brand-bg font-bold">{Math.round((goal.currentAmount / goal.targetAmount) * 100)}%</span>
+                  <span className="text-ink font-bold">{Math.round((goal.currentAmount / goal.targetAmount) * 100)}%</span>
                 </div>
                 <div className="flex gap-2">
                   <button 
@@ -128,7 +128,7 @@ export const Goals = ({ goals, onAddGoal, onEditGoal, onAddGoalDirect, onDeleteG
                     onClick={() => setExpandedGoal(expandedGoal === goal.id ? null : goal.id)}
                     className={cn(
                       "px-3 py-2 border rounded-lg text-xs font-bold transition-colors",
-                      expandedGoal === goal.id ? "bg-brand-bg text-white border-brand-bg" : "border-slate-200 text-slate-600 hover:bg-slate-50"
+                      expandedGoal === goal.id ? "bg-primary text-white border-primary" : "border-slate-200 text-slate-600 hover:bg-slate-50"
                     )}
                   >
                     {expandedGoal === goal.id ? "Hide Plan" : "View Plan"}
@@ -190,7 +190,7 @@ export const Goals = ({ goals, onAddGoal, onEditGoal, onAddGoalDirect, onDeleteG
               <p className="text-slate-500 font-medium">No goals set for this timeframe yet.</p>
               <button 
                 onClick={onAddGoal}
-                className="mt-4 text-brand-bg font-bold text-sm hover:underline"
+                className="mt-4 text-ink font-bold text-sm hover:underline"
               >
                 Set your first {activePlan.replace('-', ' ')} goal
               </button>

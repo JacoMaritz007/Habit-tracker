@@ -22,8 +22,8 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ xp, compac
     return (
       <div className="flex items-center gap-3">
         <div className="relative">
-          <div className="w-10 h-10 rounded-full bg-brand-bg/10 flex items-center justify-center border-2 border-brand-bg/20">
-            <span className="text-sm font-black text-brand-bg">{level}</span>
+          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
+            <span className="text-sm font-black text-ink">{level}</span>
           </div>
           <svg className="absolute inset-0 w-10 h-10 -rotate-90">
             <circle
@@ -45,12 +45,12 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ xp, compac
               strokeDasharray={113}
               initial={{ strokeDashoffset: 113 }}
               animate={{ strokeDashoffset: 113 - (progress * 113) }}
-              className="text-brand-bg"
+              className="text-ink"
             />
           </svg>
         </div>
         <div className="hidden sm:block">
-          <p className="text-[10px] font-black text-brand-bg uppercase tracking-widest">{rank}</p>
+          <p className="text-[10px] font-black text-ink uppercase tracking-widest">{rank}</p>
           <p className="text-[10px] text-slate-400 font-bold">{xp} Total XP</p>
         </div>
       </div>
@@ -59,14 +59,14 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ xp, compac
 
   return (
     <div className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm overflow-hidden relative group">
-      <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-brand-bg pointer-events-none group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700">
+      <div className="absolute top-0 right-0 p-8 opacity-[0.03] text-ink pointer-events-none group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700">
         <Trophy size={120} />
       </div>
 
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-brand-bg/10 flex items-center justify-center border-2 border-brand-bg/20 shadow-inner">
-            <Zap size={24} className="text-brand-bg fill-brand-bg/20" />
+          <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-primary/20 shadow-inner">
+            <Zap size={24} className="text-ink fill-primary/20" />
           </div>
           <div>
             <h3 className="text-sm font-black text-slate-400 uppercase tracking-widest mb-1">Level {level}</h3>
@@ -87,7 +87,7 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ xp, compac
           <motion.div 
             initial={{ width: 0 }}
             animate={{ width: `${progress * 100}%` }}
-            className="h-full bg-gradient-to-r from-brand-bg to-brand-accent relative"
+            className="h-full bg-emerald-500 relative"
           >
             <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(255,255,255,0.2)_25%,transparent_25%,transparent_50%,rgba(255,255,255,0.2)_50%,rgba(255,255,255,0.2)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-shimmer"></div>
           </motion.div>

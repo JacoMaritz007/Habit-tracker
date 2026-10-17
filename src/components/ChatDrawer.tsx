@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Send, Bot, User, Sparkles, Minimize2, Maximize2, MessageSquare } from 'lucide-react';
 import { cn } from '../lib/utils';
-import { GoogleGenAI } from "@google/genai";
+import { ai } from '../services/geminiClient';
 import Markdown from 'react-markdown';
 
 interface Message {
@@ -17,8 +17,6 @@ interface ChatDrawerProps {
   onClose: () => void;
   user: any;
 }
-
-const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || '' });
 
 export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user }) => {
   const [messages, setMessages] = useState<Message[]>([
@@ -58,13 +56,6 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
     setIsLoading(true);
 
     try {
-      const chat = ai.chats.create({
-        model: "gemini-3-flash-preview",
-        config: {
-          systemInstruction: "You are a world-class Wealth Coach and Financial Advisor. Your goal is to help users achieve financial freedom through habit formation, mindset shifts, and strategic planning. Be encouraging, data-driven, and practical. Use the principles of Atomic Habits and Zig Ziglar's goal setting. Keep responses concise and formatted with markdown for readability.",
-        },
-      });
-
       // Send all previous messages for context (simplified)
       const history = messages.map(m => ({
         role: m.role === 'user' ? 'user' : 'model',
@@ -126,7 +117,7 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
             )}
           >
             {/* Header */}
-            <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-brand-bg text-white">
+            <div className="p-4 border-b border-slate-100 flex items-center justify-between brand-gradient text-white">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center backdrop-blur-md">
                   <Bot size={24} className="text-white" />
@@ -167,14 +158,14 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
                 >
                   <div className={cn(
                     "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                    message.role === 'user' ? "bg-brand-accent" : "bg-brand-bg"
+                    message.role === 'user' ? "bg-brand-accent" : "bg-primary"
                   )}>
                     {message.role === 'user' ? <User size={16} className="text-white" /> : <Bot size={16} className="text-white" />}
                   </div>
                   <div className={cn(
                     "p-3 rounded-2xl text-sm shadow-sm",
                     message.role === 'user' 
-                      ? "bg-brand-bg text-white rounded-tr-none" 
+                      ? "bg-primary text-white rounded-tr-none" 
                       : "bg-white text-slate-800 border border-slate-100 rounded-tl-none"
                   )}>
                     <div className="prose prose-sm prose-slate max-w-none prose-p:leading-relaxed prose-pre:bg-slate-900 prose-pre:text-slate-100">
@@ -191,13 +182,13 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
               ))}
               {isLoading && (
                 <div className="flex gap-3 mr-auto max-w-[85%]">
-                  <div className="w-8 h-8 rounded-lg bg-brand-bg flex items-center justify-center flex-shrink-0">
+                  <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
                     <Bot size={16} className="text-white" />
                   </div>
                   <div className="p-4 bg-white border border-slate-100 rounded-2xl rounded-tl-none shadow-sm flex gap-1">
-                    <span className="w-1.5 h-1.5 bg-brand-bg/40 rounded-full animate-bounce"></span>
-                    <span className="w-1.5 h-1.5 bg-brand-bg/40 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-                    <span className="w-1.5 h-1.5 bg-brand-bg/40 rounded-full animate-bounce [animation-delay:0.4s]"></span>
+                    <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce"></span>
+                    <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:0.2s]"></span>
+                    <span className="w-1.5 h-1.5 bg-primary/40 rounded-full animate-bounce [animation-delay:0.4s]"></span>
                   </div>
                 </div>
               )}
@@ -215,12 +206,12 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   placeholder="Ask your wealth coach..."
-                  className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-brand-bg focus:border-transparent outline-none transition-all"
+                  className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all"
                 />
                 <button
                   type="submit"
                   disabled={!input.trim() || isLoading}
-                  className="absolute right-2 p-2 bg-brand-bg text-white rounded-lg hover:bg-brand-bg/90 transition-all disabled:opacity-50 disabled:hover:bg-brand-bg"
+                  className="absolute right-2 p-2 bg-primary text-white rounded-lg hover:bg-primary-hover transition-all disabled:opacity-50 disabled:hover:bg-primary"
                 >
                   <Send size={18} />
                 </button>
@@ -228,21 +219,21 @@ export const ChatDrawer: React.FC<ChatDrawerProps> = ({ isOpen, onClose, user })
               <div className="mt-3 flex items-center justify-center gap-4">
                 <button 
                   onClick={() => setInput("How can I save more this month?")}
-                  className="text-[10px] font-bold text-slate-400 hover:text-brand-bg transition-colors uppercase tracking-wider"
+                  className="text-[10px] font-bold text-slate-400 hover:text-primary-ink transition-colors uppercase tracking-wider"
                 >
                   Saving Tips
                 </button>
                 <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
                 <button 
                   onClick={() => setInput("Explain compound interest.")}
-                  className="text-[10px] font-bold text-slate-400 hover:text-brand-bg transition-colors uppercase tracking-wider"
+                  className="text-[10px] font-bold text-slate-400 hover:text-primary-ink transition-colors uppercase tracking-wider"
                 >
                   Wealth Basics
                 </button>
                 <span className="w-1 h-1 bg-slate-200 rounded-full"></span>
                 <button 
                   onClick={() => setInput("Review my goals.")}
-                  className="text-[10px] font-bold text-slate-400 hover:text-brand-bg transition-colors uppercase tracking-wider"
+                  className="text-[10px] font-bold text-slate-400 hover:text-primary-ink transition-colors uppercase tracking-wider"
                 >
                   Goal Review
                 </button>

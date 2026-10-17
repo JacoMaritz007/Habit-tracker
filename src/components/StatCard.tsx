@@ -3,7 +3,7 @@ import { cn, formatCurrency } from '../lib/utils';
 
 export const StatCard = ({ title, value, icon: Icon, color, currency }: any) => {
   const colors: any = {
-    brand: "bg-brand-bg/5 text-brand-bg border-brand-bg/10",
+    brand: "bg-primary/5 text-ink border-primary/10",
     accent: "bg-brand-accent/5 text-brand-accent border-brand-accent/10",
     emerald: "bg-emerald-50 text-emerald-600 border-emerald-100",
     rose: "bg-rose-50 text-rose-600 border-rose-100",
