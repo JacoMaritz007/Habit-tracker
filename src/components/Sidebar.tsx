@@ -59,7 +59,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin
       <div className="p-6 flex items-center justify-between border-b border-slate-100">
         <div className="flex flex-col gap-1.5">
           <h1>
-            <img src="/brand/wealthos-logo-black.png" alt="WealthOS" className="h-5 w-auto" />
+            <img src="/brand/wealthos-logo-black.png" alt="WealthOS" className="block h-[18px] w-auto" />
           </h1>
           <p className="wh-label !text-[10px]">Wealth Habits</p>
         </div>
