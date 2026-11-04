@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { LogOut, MessageSquare, Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { onAuthStateChanged, User } from 'firebase/auth';
-import { collection, query, where, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, serverTimestamp, increment } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, serverTimestamp, increment, writeBatch } from 'firebase/firestore';
 import { auth, db, logout, handleFirestoreError, OperationType } from './firebase';
 import { Sidebar } from './components/Sidebar';
 import { Dashboard } from './components/Dashboard';
@@ -18,6 +18,7 @@ import { HabitModal } from './components/HabitModal';
 import { GoalModal } from './components/GoalModal';
 import { ChatDrawer } from './components/ChatDrawer';
 import { Admin } from './components/Admin';
+import { Transactions } from './components/Transactions';
 import { isAdminUser } from './lib/admin';
 import { cn } from './lib/utils';
 import { 
@@ -168,22 +169,41 @@ export default function App() {
     };
   }, [user, isAuthReady]);
 
-  // AI Insights
+  // AI Insights. Debounced so a burst of edits (e.g. recategorising many
+  // transactions) makes one Gemini request, and sends a summary rather than
+  // every row of a large bank import.
   useEffect(() => {
-    if (transactions.length > 0 || goals.length > 0) {
-      const fetchInsights = async () => {
-        setIsAiLoading(true);
-        try {
-          const res = await getFinancialInsights({ transactions, goals });
-          setInsights(res);
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setIsAiLoading(false);
-        }
-      };
-      fetchInsights();
-    }
+    if (!transactions.length && !goals.length) return;
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const byCategory: Record<string, { income: number; expense: number; count: number }> = {};
+      const byMonth: Record<string, { income: number; expense: number }> = {};
+      for (const t of transactions) {
+        const c = (byCategory[t.category] ??= { income: 0, expense: 0, count: 0 });
+        c[t.type] += t.amount;
+        c.count += 1;
+        const m = (byMonth[t.date?.slice(0, 7) || 'unknown'] ??= { income: 0, expense: 0 });
+        m[t.type] += t.amount;
+      }
+      const recent = [...transactions].sort((a, b) => (b.date || '').localeCompare(a.date || '')).slice(0, 25)
+        .map(({ date, amount, category, type, description }) => ({ date, amount, category, type, description }));
+      setIsAiLoading(true);
+      try {
+        const res = await getFinancialInsights({
+          currency: userProfile?.currency || 'USD',
+          totalsByCategory: byCategory,
+          totalsByMonth: byMonth,
+          recentTransactions: recent,
+          goals: goals.map(({ title, targetAmount, currentAmount, deadline, category }) => ({ title, targetAmount, currentAmount, deadline, category })),
+        });
+        if (!cancelled) setInsights(res);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (!cancelled) setIsAiLoading(false);
+      }
+    }, 4000);
+    return () => { cancelled = true; clearTimeout(timer); };
   }, [transactions, goals]);
 
   const toggleHabit = async (id: string) => {
@@ -230,6 +250,34 @@ export default function App() {
       awardXP(XP_REWARDS.TRANSACTION_LOG * dataArray.length, `logging ${dataArray.length} transactions`);
     } catch (error) {
       handleFirestoreError(error, OperationType.CREATE, 'transactions');
+    }
+  };
+
+  // Edits never touch userId or createdAt, so the rules' ownership checks hold.
+  type TransactionPatch = Partial<Pick<Transaction, 'date' | 'amount' | 'category' | 'description' | 'type'>>;
+
+  const updateTransactions = async (ids: string[], patch: TransactionPatch) => {
+    if (!user || !ids.length) return;
+    try {
+      for (let i = 0; i < ids.length; i += 400) {
+        const batch = writeBatch(db);
+        ids.slice(i, i + 400).forEach(id => batch.update(doc(db, 'transactions', id), { ...patch, updatedAt: serverTimestamp() }));
+        await batch.commit();
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.UPDATE, 'transactions');
+    }
+  };
+
+  const deleteTransactions = async (ids: string[]) => {
+    try {
+      for (let i = 0; i < ids.length; i += 400) {
+        const batch = writeBatch(db);
+        ids.slice(i, i + 400).forEach(id => batch.delete(doc(db, 'transactions', id)));
+        await batch.commit();
+      }
+    } catch (error) {
+      handleFirestoreError(error, OperationType.DELETE, 'transactions');
     }
   };
 
@@ -608,6 +656,7 @@ export default function App() {
                     isAiLoading={isAiLoading} 
                     onAddTransaction={() => setIsTransactionModalOpen(true)}
                     onDeleteTransaction={deleteTransaction}
+                    onViewAllTransactions={() => setActiveTab('transactions')}
                     currency={userProfile?.currency}
                     userProfile={userProfile}
                   />
@@ -712,6 +761,23 @@ export default function App() {
                   />
                 </motion.div>
               )}
+              {activeTab === 'transactions' && (
+                <motion.div 
+                  key="transactions"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  className="space-y-8"
+                >
+                  <Transactions
+                    transactions={transactions}
+                    currency={userProfile?.currency}
+                    onAdd={() => setIsTransactionModalOpen(true)}
+                    onUpdate={updateTransactions}
+                    onDelete={deleteTransactions}
+                  />
+                </motion.div>
+              )}
               {activeTab === 'admin' && isAdmin && (
                 <motion.div 
                   key="admin"
@@ -749,6 +815,7 @@ export default function App() {
         isOpen={isTransactionModalOpen} 
         onClose={() => setIsTransactionModalOpen(false)} 
         onAdd={addTransactions}
+        currency={userProfile?.currency}
       />
       <HabitModal 
         isOpen={isHabitModalOpen} 

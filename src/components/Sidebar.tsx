@@ -9,7 +9,8 @@ import {
   Calculator,
   X,
   Trophy,
-  ShieldCheck
+  ShieldCheck,
+  Receipt
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProgressIndicator } from './ProgressIndicator';
@@ -83,6 +84,13 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin
           label="Dashboard" 
           active={activeTab === 'dashboard'} 
           onClick={() => setActiveTab('dashboard')} 
+          activeTab={activeTab}
+        />
+        <SidebarItem 
+          icon={Receipt} 
+          label="Transactions" 
+          active={activeTab === 'transactions'} 
+          onClick={() => setActiveTab('transactions')} 
           activeTab={activeTab}
         />
         <SidebarItem 
