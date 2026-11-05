@@ -4,6 +4,7 @@ import { calculateLevel, getLevelProgress, getRankTitle, getXPForLevel, getNextR
 import { XP_REWARDS } from '../types';
 import { cn } from '../lib/utils';
 import { motion } from 'motion/react';
+import { RingGauge } from './RingGauge';
 
 interface ProgressIndicatorProps {
   xp: number;
@@ -39,34 +40,13 @@ export const ProgressIndicator: React.FC<ProgressIndicatorProps> = ({ xp, compac
   if (compact) {
     return (
       <div className="flex items-center gap-3">
-        <div className="relative">
-          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center border-2 border-primary/20">
-            <span className="text-sm font-black text-ink">{level}</span>
-          </div>
-          <svg className="absolute inset-0 w-10 h-10 -rotate-90">
-            <circle
-              cx="20"
-              cy="20"
-              r="18"
-              fill="transparent"
-              stroke="currentColor"
-              strokeWidth="3"
-              className="text-slate-100"
-            />
-            <motion.circle
-              cx="20"
-              cy="20"
-              r="18"
-              fill="transparent"
-              stroke="currentColor"
-              strokeWidth="3"
-              strokeDasharray={113}
-              initial={{ strokeDashoffset: 113 }}
-              animate={{ strokeDashoffset: 113 - (progress * 113) }}
-              className="text-ink"
-            />
-          </svg>
-        </div>
+        <RingGauge
+          value={progress}
+          size={40}
+          stroke={3}
+          className="text-primary"
+          label={<span className="w-[30px] h-[30px] rounded-full bg-primary/10 flex items-center justify-center text-sm font-black text-ink">{level}</span>}
+        />
         <div className="hidden sm:block">
           <p className="text-[10px] font-black text-ink uppercase tracking-widest">{rank}</p>
           <p className="text-[10px] text-slate-400 font-bold">{xp} Total XP</p>
