@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   ArrowRight, 
@@ -11,12 +11,17 @@ import {
   TrendingUp,
   Target,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  Check,
+  BadgeCheck
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 interface WealthEnneagramModuleProps {
   onBack: () => void;
+  /** The member's saved self-assessed type (1–9), if any. */
+  savedType?: number | null;
+  onSaveType?: (typeId: number) => Promise<void>;
 }
 
 const WEALTH_PROFILES = [
@@ -89,9 +94,35 @@ const trackEvent = (eventName: string) => {
   console.log(`[Analytics] Event Tracked: ${eventName}`);
 };
 
-export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ onBack }) => {
-  const [step, setStep] = useState(1);
-  const [selectedType, setSelectedType] = useState<number | null>(null);
+export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ onBack, savedType = null, onSaveType }) => {
+  // Members who already chose a type land on the types grid with it selected.
+  const [step, setStep] = useState(savedType ? 2 : 1);
+  const [selectedType, setSelectedType] = useState<number | null>(savedType);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
+
+  // The profile loads after first render; pick up the saved type when it arrives.
+  useEffect(() => {
+    if (savedType && selectedType === null) {
+      setSelectedType(savedType);
+      setStep(s => (s === 1 ? 2 : s));
+    }
+  }, [savedType]);
+
+  const saveSelection = async () => {
+    if (!selectedType || !onSaveType) return;
+    setSaving(true);
+    setSaveError('');
+    try {
+      await onSaveType(selectedType);
+      trackEvent(`enneagram_type_${selectedType}_saved`);
+    } catch (err) {
+      console.error(err);
+      setSaveError("Couldn't save your type. Please try again.");
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const nextStep = () => {
     trackEvent(`enneagram_step_${step}_completed`);
@@ -181,7 +212,11 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
           >
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-black text-slate-900 tracking-tight">Which Investor Are You?</h2>
-              <p className="text-slate-500 font-medium">Tap a number to reveal your wealth archetype.</p>
+              <p className="text-slate-500 font-medium">
+                {savedType
+                  ? <>Your type is <span className="font-semibold text-ink">Type {savedType}: {WEALTH_PROFILES[savedType - 1].title}</span>. Tap another number to explore or change it.</>
+                  : 'Tap a number to reveal your wealth archetype, then save the one that fits you.'}
+              </p>
             </div>
 
             <div className="grid grid-cols-3 gap-2 max-w-xs mx-auto w-full">
@@ -205,7 +240,7 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                   )}>
                     {profile.id}
                   </span>
-                  <span className="text-[7px] font-bold uppercase tracking-widest opacity-50">Type</span>
+                  <span className="text-[7px] font-bold uppercase tracking-widest opacity-50">{savedType === profile.id ? 'Yours' : 'Type'}</span>
                 </button>
               ))}
             </div>
@@ -220,16 +255,28 @@ export const WealthEnneagramModule: React.FC<WealthEnneagramModuleProps> = ({ on
                     exit={{ opacity: 0, y: -10 }}
                     className="bg-white p-8 rounded-3xl border border-slate-200 shadow-lg w-full max-w-2xl"
                   >
-                    <div className="flex items-center gap-4 mb-6">
+                    <div className="flex flex-wrap items-center gap-4 mb-6">
                       <div className="w-12 h-12 bg-primary/10 text-ink rounded-xl flex items-center justify-center">
                         {React.createElement(WEALTH_PROFILES[selectedType - 1].icon, { size: 24 })}
                       </div>
-                      <div>
+                      <div className="flex-1 min-w-0">
                         <h3 className="text-xl font-bold text-slate-900">
                           Type {selectedType}: {WEALTH_PROFILES[selectedType - 1].title}
                         </h3>
                       </div>
+                      {onSaveType && (savedType === selectedType ? (
+                        <span className="wh-chip wh-chip--green"><BadgeCheck size={15} /> Your type</span>
+                      ) : (
+                        <button
+                          onClick={saveSelection}
+                          disabled={saving}
+                          className="flex items-center gap-2 h-10 px-5 rounded-full bg-ink text-white text-sm font-semibold hover:bg-slate-700 disabled:opacity-50"
+                        >
+                          <Check size={16} /> {saving ? 'Saving…' : savedType ? 'Change to this type' : 'This is my type'}
+                        </button>
+                      ))}
                     </div>
+                    {saveError && <p className="text-sm font-medium text-rose-600 -mt-3 mb-4">{saveError}</p>}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div className="space-y-2">
                         <div className="flex items-center gap-2 text-emerald-600 font-bold text-xs uppercase tracking-wider">
