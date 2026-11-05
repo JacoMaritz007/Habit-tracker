@@ -474,7 +474,7 @@ export default function App() {
       await setDoc(doc(db, 'users', user.uid), data, { merge: true });
       
       if (isEnneagramSetting && !wasEnneagramSet) {
-        awardXP(50, 'discovering your enneagram type');
+        awardXP(XP_REWARDS.ENNEAGRAM_TYPE, 'discovering your enneagram type');
       }
       if (isPhotoAnalyzing && !wasPhotoAnalyzed) {
         awardXP(XP_REWARDS.PHOTO_ANALYSIS, 'analyzing your wealth persona photo');

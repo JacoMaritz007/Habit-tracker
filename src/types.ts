@@ -84,6 +84,7 @@ export const XP_REWARDS = {
   MONEY_STORY_ANSWER: 10,
   FREEDOM_CALC_SAVE: 50,
   PHOTO_ANALYSIS: 30,
+  ENNEAGRAM_TYPE: 50,
 };
 
 export const PROGRESS_BADGES: Badge[] = [
