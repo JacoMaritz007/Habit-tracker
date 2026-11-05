@@ -19,6 +19,9 @@ import { GoalModal } from './components/GoalModal';
 import { ChatDrawer } from './components/ChatDrawer';
 import { Admin } from './components/Admin';
 import { Transactions } from './components/Transactions';
+import { Support } from './components/Support';
+import { AdminSupport } from './components/AdminSupport';
+import { subscribeAllTickets } from './services/support';
 import { isAdminUser } from './lib/admin';
 import { cn } from './lib/utils';
 import { 
@@ -555,6 +558,14 @@ export default function App() {
 
   const isAdmin = isAdminUser(user, userProfile);
 
+  // Admin sidebar badge: tickets waiting on a support reply.
+  const [supportCount, setSupportCount] = useState(0);
+  useEffect(() => {
+    if (!isAdmin) return;
+    return subscribeAllTickets(ts =>
+      setSupportCount(ts.filter(t => t.status === 'open' || (t.status === 'escalated' && t.lastMessageBy === 'member')).length));
+  }, [isAdmin]);
+
   if (!isAuthReady) {
     return (
       <div className="h-screen flex items-center justify-center bg-slate-50">
@@ -597,6 +608,7 @@ export default function App() {
             onClose={() => setIsSidebarOpen(false)}
             userProfile={userProfile}
             isAdmin={isAdmin}
+            supportCount={supportCount}
           />
         </div>
 
@@ -622,7 +634,7 @@ export default function App() {
                 <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-accent rounded-full border-2 border-white animate-pulse"></span>
               </button>
-              <NotificationBell userId={user.uid} />
+              <NotificationBell userId={user.uid} onOpen={n => { if (n.type === 'support_reply') setActiveTab('support'); }} />
               <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-bold text-slate-900">{user.displayName}</p>
@@ -776,6 +788,16 @@ export default function App() {
                     onUpdate={updateTransactions}
                     onDelete={deleteTransactions}
                   />
+                </motion.div>
+              )}
+              {activeTab === 'support' && (
+                <motion.div key="support" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <Support user={user} />
+                </motion.div>
+              )}
+              {activeTab === 'admin-support' && isAdmin && (
+                <motion.div key="admin-support" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }}>
+                  <AdminSupport admin={{ uid: user.uid, name: user.displayName || 'Support team' }} />
                 </motion.div>
               )}
               {activeTab === 'admin' && isAdmin && (

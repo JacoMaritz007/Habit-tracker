@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { formatDistanceToNow } from 'date-fns';
-import { Bell, Sparkles, TrendingUp, Award, Target, Flame, Megaphone, CheckCheck } from 'lucide-react';
+import { Bell, Sparkles, TrendingUp, Award, Target, Flame, Megaphone, CheckCheck, LifeBuoy } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { markAllRead, markRead, subscribeToNotifications } from '../services/notifications';
 import type { AppNotification, NotificationType } from '../types';
@@ -13,9 +13,10 @@ const TYPE_STYLE: Record<NotificationType, { icon: any; tone: string }> = {
   goal_complete: { icon: Target, tone: 'bg-emerald-50 text-emerald-600' },
   streak: { icon: Flame, tone: 'bg-primary-soft text-primary-ink' },
   announcement: { icon: Megaphone, tone: 'bg-ink text-white' },
+  support_reply: { icon: LifeBuoy, tone: 'bg-blue-50 text-blue-600' },
 };
 
-export const NotificationBell = ({ userId }: { userId: string }) => {
+export const NotificationBell = ({ userId, onOpen }: { userId: string; onOpen?: (n: AppNotification) => void }) => {
   const [items, setItems] = useState<AppNotification[]>([]);
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -87,7 +88,10 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                 return (
                   <button
                     key={n.id}
-                    onClick={() => !n.read && markRead(n.id).catch(console.error)}
+                    onClick={() => {
+                      if (!n.read) markRead(n.id).catch(console.error);
+                      if (onOpen) { onOpen(n); setOpen(false); }
+                    }}
                     className={cn(
                       'w-full text-left flex gap-3 px-4 py-3 border-b border-slate-100 last:border-0 transition-colors hover:bg-slate-50',
                       !n.read && 'bg-primary-soft/40'
@@ -104,6 +108,7 @@ export const NotificationBell = ({ userId }: { userId: string }) => {
                       {n.body && <p className="text-xs text-slate-600 mt-0.5 leading-relaxed whitespace-pre-line">{n.body}</p>}
                       <p className="text-[11px] text-slate-400 mt-1">
                         {n.type === 'announcement' && 'From the Wealth Habits team · '}
+                        {n.type === 'support_reply' && 'Tap to open your request · '}
                         {when ? formatDistanceToNow(when, { addSuffix: true }) : 'just now'}
                       </p>
                     </div>

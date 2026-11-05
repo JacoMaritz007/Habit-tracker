@@ -175,7 +175,7 @@ export const ENNEAGRAM_TYPES: EnneagramType[] = [
   { id: 9, title: 'The Complacent Avoider', description: 'Avoids financial stress and conflict by ignoring money matters.' },
 ];
 
-export type NotificationType = 'welcome' | 'level_up' | 'badge' | 'goal_complete' | 'streak' | 'announcement';
+export type NotificationType = 'welcome' | 'level_up' | 'badge' | 'goal_complete' | 'streak' | 'announcement' | 'support_reply';
 
 export type AppNotification = {
   id: string;
@@ -186,4 +186,30 @@ export type AppNotification = {
   read: boolean;
   createdAt?: { toDate: () => Date } | null;
   sentBy?: string;
+};
+
+export type SupportCategory = 'account' | 'technical' | 'billing' | 'coaching' | 'feedback' | 'other';
+export type SupportStatus = 'open' | 'answered' | 'escalated' | 'closed';
+
+export type SupportTicket = {
+  id: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  subject: string;
+  category: SupportCategory;
+  status: SupportStatus;
+  lastMessageBy: 'member' | 'admin';
+  createdAt?: { toDate: () => Date } | null;
+  updatedAt?: { toDate: () => Date } | null;
+  escalatedAt?: { toDate: () => Date } | null;
+};
+
+export type SupportMessage = {
+  id: string;
+  authorId: string;
+  authorName: string;
+  authorRole: 'member' | 'admin';
+  body: string;
+  createdAt?: { toDate: () => Date } | null;
 };
