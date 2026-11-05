@@ -96,13 +96,6 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin
           activeTab={activeTab}
         />
         <SidebarItem 
-          icon={CheckCircle2} 
-          label="Habits" 
-          active={activeTab === 'habits'} 
-          onClick={() => setActiveTab('habits')} 
-          activeTab={activeTab}
-        />
-        <SidebarItem 
           icon={Target} 
           label="Goals" 
           active={activeTab === 'goals'} 
@@ -117,8 +110,15 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin
           activeTab={activeTab}
         />
         <SidebarItem 
+          icon={CheckCircle2} 
+          label="Habits" 
+          active={activeTab === 'habits'} 
+          onClick={() => setActiveTab('habits')} 
+          activeTab={activeTab}
+        />
+        <SidebarItem 
           icon={BrainCircuit} 
-          label="Mindset Money" 
+          label="Money Mindset" 
           active={activeTab.startsWith('mindset')} 
           onClick={() => setActiveTab('mindset')}
           activeTab={activeTab}

@@ -44,6 +44,23 @@ import { NotificationBell } from './components/NotificationBell';
 
 const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
+const PAGE_TITLES: Record<string, string> = {
+  dashboard: 'Dashboard',
+  transactions: 'Transactions',
+  goals: 'Goals',
+  'freedom-calculator': 'Freedom Calculator',
+  habits: 'Habits',
+  mindset: 'Money Mindset',
+  'mindset-enneagram': 'Money Mindset · Wealth Enneagram',
+  'mindset-story': 'Money Mindset · Money Story',
+  'mindset-gratitude': 'Money Mindset · Scarcity to Abundance',
+  'mindset-self-care': 'Money Mindset · Financial Self-Care',
+  account: 'Account',
+  support: 'Support',
+  admin: 'Admin · Members',
+  'admin-support': 'Admin · Support',
+};
+
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthReady, setIsAuthReady] = useState(false);
@@ -623,7 +640,7 @@ export default function App() {
                 <Menu size={24} />
               </button>
               <h2 className="text-lg sm:text-xl font-semibold text-slate-800 capitalize truncate">
-                {activeTab.replace('-', ' ')}
+                {PAGE_TITLES[activeTab] ?? activeTab.replace('-', ' ')}
               </h2>
             </div>
             <div className="flex items-center gap-4">
