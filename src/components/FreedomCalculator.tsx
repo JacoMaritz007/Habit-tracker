@@ -33,6 +33,8 @@ import {
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { FreedomCalculatorData, FreedomGoal } from '../types';
+import { freedomNumber as calcFreedomNumber, project, formatDuration, MAX_YEARS } from '../lib/freedom';
+import { InfoTip } from './InfoTip';
 import { cn } from '../lib/utils';
 
 interface FreedomCalculatorProps {
@@ -66,6 +68,36 @@ const EXPENSE_BUFFERS = [
   { label: '75%', value: 0.75 },
   { label: '100%', value: 1.0 },
 ];
+
+
+// Plain-language explanations shown in the metric tooltips.
+const HELP = {
+  earnedIncome: 'Money you earn by working each month, after tax: salary, commission or business drawings.',
+  passiveIncome: 'Money that arrives each month without you working for it: rent, dividends, interest, royalties.',
+  expenses: 'What you spend in a normal month to live: housing, food, transport, insurance, school fees, debt repayments.',
+  expenseBuffer: 'Extra on top of your expenses for lifestyle upgrades and surprises. A 10% buffer plans for living costs 10% higher than today.',
+  monthlySavingsRate: 'Share of your monthly income left after expenses: (income − expenses) ÷ income. The higher it is, the faster you can invest.',
+  monthlySurplus: 'Income minus expenses each month. This is the money available to invest.',
+  netWorth: 'Everything you own (assets) minus everything you owe (liabilities). It includes things like your home and business, which may not produce income.',
+  expensesBaseline: 'The monthly living cost your freedom must cover. It starts as your expenses from step 1; change it if you expect to live differently once free.',
+  inflation: 'How fast prices rise each year. Your Freedom Number is in today\u2019s money; in projections it grows by this rate, so the target reflects what freedom will cost in future.',
+  withdrawalRate: 'How much of your capital you can draw each year without running out. 4% means every R1m funds about R40,000 a year. A lower rate is safer but needs more capital.',
+  freedomNumber: 'The capital you need to live off your investments: buffered yearly expenses ÷ withdrawal rate, plus once-off freedom goals. Shown in today\u2019s money.',
+  retirementCapital: 'The part of your Freedom Number that funds your living costs: buffered monthly expenses × 12 ÷ withdrawal rate.',
+  goalsCost: 'Once-off amounts you want to fund on top of your living costs, such as a home, education or travel.',
+  startingCapital: 'Money you already have working for you towards freedom: investments, savings and other income-producing assets. Leave out your home unless you plan to sell it.',
+  monthlyInvestment: 'How much you will add to your investments each month.',
+  annualIncrease: 'How much you raise your monthly investment each year, for example with salary increases. 5% means R10,000 a month becomes R10,500 next year.',
+  growthRate: 'The average yearly return you expect on your investments before inflation. The projection compounds it monthly. Higher returns usually mean more risk.',
+  timeHorizon: 'The year the Result card reports on. It doesn\u2019t change your Time to Freedom, which is worked out separately.',
+  projectedCapital: 'What your capital could grow to by the end of your time horizon, using your starting capital, monthly investment, yearly increase and growth rate. A projection, not a guarantee.',
+  projectedPassive: 'The monthly income your projected capital could pay you at your withdrawal rate: capital × withdrawal rate ÷ 12.',
+  timeToFreedom: `How long until your projected capital first reaches your Freedom Number, with the target rising each year by inflation. If it isn\u2019t reached within ${MAX_YEARS} years you\u2019ll see why instead of a date. A projection, not a guarantee.`,
+  freedomRatio: 'How far you are towards your Freedom Number today: current net worth ÷ Freedom Number. 100% means your net worth equals the target.',
+  passiveCoverage: 'How much of your buffered monthly expenses your current passive income already covers: passive income ÷ buffered expenses. 100% means you could stop working today.',
+  savingsRate: 'Share of your monthly income left after expenses: (income − expenses) ÷ income. Above 30% is excellent; below 15% needs focus.',
+  monthlyPassive: 'The passive income you receive today, from step 1.',
+};
 
 export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSave, globalCurrency }) => {
   const [activeStep, setActiveStep] = useState('start');
@@ -162,43 +194,50 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
   const totalLiabilities = Object.values(localData.liabilities || {}).reduce((a, b) => (a as number) + (b as number), 0) as number;
   const netWorth = totalAssets - totalLiabilities;
 
-  const withdrawalRate = localData.withdrawalRate || 0.04;
-  const retirementCapitalRequired = (bufferedExpenses * 12) / withdrawalRate;
-  const totalGoalsCost = (localData.freedomGoals || []).reduce((sum, goal) => sum + goal.cost, 0);
-  const freedomNumber = retirementCapitalRequired + totalGoalsCost;
+  // Zero is a valid rate, so fall back to defaults only when a value is missing.
+  const withdrawalRate = localData.withdrawalRate ?? 0.04;
+  const inflationRate = localData.inflationRate ?? 0.06;
+  const growthRate = localData.targetIrr ?? 0.12;
+  const annualIncrease = localData.annualIncrease ?? 0.05;
+  const timelineYears = localData.timelineYears ?? 20;
+  const startingCapital = localData.startingCapital ?? netWorth;
+  const totalGoalsCost = (localData.freedomGoals || []).reduce((sum, goal) => sum + (goal.cost || 0), 0);
+  const { retirementCapital: retirementCapitalRequired, total: freedomNumber } = calcFreedomNumber({
+    monthlyExpenses: baseMonthlyExpenses,
+    expenseBuffer: localData.expenseBuffer ?? 0,
+    withdrawalRate,
+    goalsCost: totalGoalsCost,
+  });
 
-  // Wealth Plan Projections
-  const projections = useMemo(() => {
-    const years = 30; // Always calculate up to 30 years for the chart
-    const start = localData.startingCapital ?? netWorth;
-    const monthly = localData.monthlyInvestment || 0;
-    const annualInc = localData.annualIncrease || 0;
-    const irr = localData.targetIrr || 0.12;
-    
-    const results = [];
-    let currentBalance = start;
-    let currentMonthly = monthly;
+  // Wealth Plan projection (see src/lib/freedom.ts for the method).
+  const { yearly, timeToFreedom } = useMemo(() => project({
+    freedomNumber,
+    startingCapital,
+    monthlyInvestment: localData.monthlyInvestment ?? 0,
+    annualIncrease,
+    growthRate,
+    inflationRate,
+  }), [freedomNumber, startingCapital, localData.monthlyInvestment, annualIncrease, growthRate, inflationRate]);
+  // The chart shows 30 years; the time-to-freedom search runs to MAX_YEARS.
+  const projections = yearly.slice(0, 31).map(p => ({ year: p.year, balance: Math.round(p.balance), freedomNumber: Math.round(p.target) }));
 
-    for (let year = 0; year <= years; year++) {
-      results.push({ 
-        year, 
-        balance: Math.round(currentBalance),
-        freedomNumber: Math.round(freedomNumber)
-      });
-      
-      // Compound for the year
-      for (let month = 0; month < 12; month++) {
-        currentBalance = currentBalance * (1 + irr / 12) + currentMonthly;
-      }
-      currentMonthly *= (1 + annualInc);
-    }
-    return results;
-  }, [localData, netWorth, freedomNumber]);
-
-  const userTimelineProjection = projections.find(p => p.year === (localData.timelineYears || 20));
-  const finalBalance = userTimelineProjection?.balance || 0;
+  const horizon = yearly.find(p => p.year === timelineYears) ?? yearly[yearly.length - 1];
+  const finalBalance = horizon.balance;
+  const targetAtHorizon = horizon.target;
   const freedomRatio = freedomNumber > 0 ? netWorth / freedomNumber : 0;
   const passiveIncomeRatio = bufferedExpenses > 0 ? (localData.monthlyPassiveIncome || 0) / bufferedExpenses : 0;
+  const pct = (n: number) => `${Math.round(n * 1000) / 10}%`;
+  const money = (n: number) => `${currencySymbol}${Math.round(n).toLocaleString()}`;
+
+  const timeToFreedomText = timeToFreedom.status === 'already-free' ? 'Already free'
+    : timeToFreedom.status === 'reached' ? formatDuration(timeToFreedom)
+    : timeToFreedom.status === 'not-reached' ? `Not within ${MAX_YEARS} yrs`
+    : '—';
+  const freedomDate = timeToFreedom.status === 'reached'
+    ? new Date(new Date().getFullYear(), new Date().getMonth() + timeToFreedom.months, 1).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    : null;
+  const assumptionsText = `Projected, not guaranteed. Assumes ${pct(growthRate)} yearly growth, ${pct(inflationRate)} inflation (your Freedom Number rises with it), `
+    + `${money(localData.monthlyInvestment ?? 0)} invested monthly rising ${pct(annualIncrease)} a year, starting from ${money(startingCapital)}.`;
 
   const renderStep = () => {
     switch (activeStep) {
@@ -294,7 +333,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   </h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Earned Income</label>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Earned Income <InfoTip text={HELP.earnedIncome} /></label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
                         <input
@@ -307,7 +346,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Passive Income</label>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Passive Income <InfoTip text={HELP.passiveIncome} /></label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
                         <input
@@ -320,7 +359,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Expenses</label>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monthly Expenses <InfoTip text={HELP.expenses} /></label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
                         <input
@@ -333,7 +372,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       </div>
                     </div>
                     <div>
-                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Expense Buffer (Lifestyle "Fat")</label>
+                      <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Expense Buffer (Lifestyle "Fat") <InfoTip text={HELP.expenseBuffer} /></label>
                       <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                         {EXPENSE_BUFFERS.map(buffer => (
                           <button
@@ -357,11 +396,11 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                 <div className="bg-emerald-50 p-6 rounded-2xl border border-emerald-100">
                   <div className="flex justify-between items-end">
                     <div>
-                      <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Monthly Savings Rate</p>
+                      <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Monthly Savings Rate <InfoTip text={HELP.monthlySavingsRate} /></p>
                       <p className="text-3xl font-bold text-emerald-900">{(savingsRate * 100).toFixed(1)}%</p>
                     </div>
                     <div className="text-right">
-                      <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Monthly Surplus</p>
+                      <p className="text-xs font-black text-emerald-600 uppercase tracking-widest mb-1">Monthly Surplus <InfoTip text={HELP.monthlySurplus} /></p>
                       <p className="text-xl font-bold text-emerald-900">{currencySymbol}{(totalMonthlyIncome - (localData.monthlyExpenses || 0)).toLocaleString()}</p>
                     </div>
                   </div>
@@ -416,7 +455,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                 <div className="brand-gradient p-6 rounded-2xl shadow-xl relative overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full -mr-16 -mt-16 blur-2xl" />
                   <div className="relative z-10">
-                    <p className="text-xs font-black text-white uppercase tracking-widest mb-1">Current Net Worth</p>
+                    <p className="text-xs font-black text-white uppercase tracking-widest mb-1">Current Net Worth <InfoTip dark text={HELP.netWorth} /></p>
                     <p className={cn(
                       "text-4xl font-bold tracking-tight",
                       netWorth >= 0 ? "text-white" : "text-rose-400"
@@ -496,7 +535,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           />
                         </div>
                         <div className="w-40">
-                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Cost</label>
+                          <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Estimated Cost <InfoTip text={HELP.goalsCost} /></label>
                           <div className="relative">
                             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{currencySymbol}</span>
                             <input
@@ -531,7 +570,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   <h4 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">Assumptions</h4>
                   <div className="space-y-4">
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Monthly Expenses Baseline</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Monthly Expenses Baseline <InfoTip text={HELP.expensesBaseline} /></label>
                       <div className="relative">
                         <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-bold">{currencySymbol}</span>
                         <input
@@ -545,12 +584,12 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       <p className="text-[10px] text-slate-400 mt-1">Override your Step 1 expenses if needed.</p>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Assumed Inflation Rate</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Assumed Inflation Rate <InfoTip text={HELP.inflation} /></label>
                       <div className="relative">
                         <input
                           type="number"
                           step="0.1"
-                          value={Math.round((localData.inflationRate || 0.06) * 1000) / 10}
+                          value={Math.round(inflationRate * 1000) / 10}
                           onChange={(e) => updateField('inflationRate', Number(e.target.value) / 100)}
                           className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                         />
@@ -558,12 +597,12 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       </div>
                     </div>
                     <div>
-                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Yield / Withdrawal Rate</label>
+                      <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Yield / Withdrawal Rate <InfoTip text={HELP.withdrawalRate} /></label>
                       <div className="relative">
                         <input
                           type="number"
                           step="0.1"
-                          value={Math.round((localData.withdrawalRate || 0.04) * 1000) / 10}
+                          value={Math.round(withdrawalRate * 1000) / 10}
                           onChange={(e) => updateField('withdrawalRate', Number(e.target.value) / 100)}
                           className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                         />
@@ -576,17 +615,17 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
 
                 <div className="brand-gradient p-6 rounded-2xl shadow-xl relative overflow-hidden">
                   <div className="relative z-10 text-white">
-                    <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">Total Freedom Number</p>
+                    <p className="text-xs font-black text-primary uppercase tracking-widest mb-1">Total Freedom Number <InfoTip dark text={HELP.freedomNumber} /></p>
                     <p className="text-4xl font-bold tracking-tight">
                       {currencySymbol}{freedomNumber.toLocaleString()}
                     </p>
                     <div className="mt-4 pt-4 border-t border-white/10 space-y-2">
                       <div className="flex justify-between text-xs">
-                        <span className="text-white">Retirement Capital:</span>
+                        <span className="text-white flex items-center gap-1.5">Retirement Capital <InfoTip dark text={HELP.retirementCapital} /></span>
                         <span className="font-bold">{currencySymbol}{retirementCapitalRequired.toLocaleString()}</span>
                       </div>
                       <div className="flex justify-between text-xs">
-                        <span className="text-white">Other Goals:</span>
+                        <span className="text-white flex items-center gap-1.5">Other Goals <InfoTip dark text={HELP.goalsCost} /></span>
                         <span className="font-bold">{currencySymbol}{totalGoalsCost.toLocaleString()}</span>
                       </div>
                     </div>
@@ -629,7 +668,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Starting Capital</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Starting Capital <InfoTip text={HELP.startingCapital} /></label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{currencySymbol}</span>
                           <input
@@ -642,7 +681,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         <p className="text-[10px] text-slate-400 mt-1">Defaults to your current Net Worth</p>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Monthly Investment</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Monthly Investment <InfoTip text={HELP.monthlyInvestment} /></label>
                         <div className="relative">
                           <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs">{currencySymbol}</span>
                           <input
@@ -654,12 +693,12 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Annual Contribution Increase</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Annual Contribution Increase <InfoTip text={HELP.annualIncrease} /></label>
                         <div className="relative">
                           <input
                             type="number"
                             step="0.1"
-                            value={(localData.annualIncrease || 0.05) * 100}
+                            value={Math.round(annualIncrease * 1000) / 10}
                             onChange={(e) => updateField('annualIncrease', Number(e.target.value) / 100)}
                             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           />
@@ -669,12 +708,12 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                     </div>
                     <div className="space-y-4">
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Average IRR</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Target Average IRR <InfoTip text={HELP.growthRate} /></label>
                         <div className="relative">
                           <input
                             type="number"
                             step="0.1"
-                            value={(localData.targetIrr || 0.12) * 100}
+                            value={Math.round(growthRate * 1000) / 10}
                             onChange={(e) => updateField('targetIrr', Number(e.target.value) / 100)}
                             className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm font-bold outline-none focus:border-focus"
                           />
@@ -682,18 +721,18 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                         </div>
                       </div>
                       <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time Horizon (Years)</label>
+                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time Horizon (Years) <InfoTip text={HELP.timeHorizon} /></label>
                         <input
                           type="range"
                           min="1"
                           max="40"
-                          value={localData.timelineYears || 20}
+                          value={timelineYears}
                           onChange={(e) => updateField('timelineYears', Number(e.target.value))}
                           className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-primary mt-4"
                         />
                         <div className="flex justify-between mt-2">
                           <span className="text-[10px] font-bold text-slate-400">1 Year</span>
-                          <span className="text-sm font-bold text-ink">{localData.timelineYears || 20} Years</span>
+                          <span className="text-sm font-bold text-ink">{timelineYears} Years</span>
                           <span className="text-[10px] font-bold text-slate-400">40 Years</span>
                         </div>
                       </div>
@@ -711,7 +750,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="w-3 h-3 bg-rose-400 rounded-full" />
-                        <span className="text-[10px] font-bold text-slate-500 uppercase">Freedom Number</span>
+                        <span className="text-[10px] font-bold text-slate-500 uppercase">Freedom Number (rises with inflation)</span>
                       </div>
                     </div>
                   </div>
@@ -777,7 +816,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           animationDuration={1500}
                         />
                         <ReferenceLine 
-                          x={localData.timelineYears || 20} 
+                          x={timelineYears} 
                           stroke="#0077B6" 
                           strokeDasharray="3 3"
                           label={{ 
@@ -799,27 +838,34 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   <h4 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wider">The Result</h4>
                   <div className="space-y-6">
                     <div>
-                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Projected Capital</p>
-                      <p className="text-3xl font-bold text-slate-900">{currencySymbol}{Math.round(finalBalance).toLocaleString()}</p>
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">Projected Capital in {timelineYears} yrs <InfoTip text={HELP.projectedCapital} /></p>
+                      <p className="text-3xl font-bold text-slate-900">{money(finalBalance)}</p>
                     </div>
                     <div>
-                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1">Projected Monthly Passive</p>
-                      <p className="text-2xl font-bold text-emerald-600">{currencySymbol}{Math.round((finalBalance * 0.04) / 12).toLocaleString()}</p>
-                      <p className="text-[10px] text-slate-400 mt-1">Based on 4% safe withdrawal rate</p>
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">Projected Monthly Passive <InfoTip text={HELP.projectedPassive} /></p>
+                      <p className="text-2xl font-bold text-emerald-600">{money((finalBalance * withdrawalRate) / 12)}</p>
+                      <p className="text-[10px] text-slate-400 mt-1">At your {pct(withdrawalRate)} withdrawal rate, in year {timelineYears}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1.5">Time to Freedom <InfoTip text={HELP.timeToFreedom} /></p>
+                      <p className="text-2xl font-bold text-primary-ink">{timeToFreedomText}</p>
+                      {freedomDate && <p className="text-[10px] text-slate-400 mt-1">Projected around {freedomDate}</p>}
+                      {timeToFreedom.status === 'not-reached' && <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{timeToFreedom.reason}</p>}
+                      {timeToFreedom.status === 'no-target' && <p className="text-[11px] text-slate-500 mt-1 leading-relaxed">{timeToFreedom.reason}</p>}
                     </div>
                     
                     <div className={cn(
                       "p-4 rounded-xl border flex items-center gap-3",
-                      finalBalance >= freedomNumber 
+                      finalBalance >= targetAtHorizon 
                         ? "bg-emerald-50 border-emerald-100 text-emerald-700"
                         : "bg-rose-50 border-rose-100 text-rose-700"
                     )}>
-                      {finalBalance >= freedomNumber ? (
+                      {finalBalance >= targetAtHorizon ? (
                         <>
                           <ShieldCheck size={24} />
                           <div>
                             <p className="text-xs font-bold">Plan Successful</p>
-                            <p className="text-[10px] opacity-80">You exceed your Freedom Number by {currencySymbol}{Math.round(finalBalance - freedomNumber).toLocaleString()}</p>
+                            <p className="text-[10px] opacity-80">In year {timelineYears} you exceed your inflation-adjusted Freedom Number ({money(targetAtHorizon)}) by {money(finalBalance - targetAtHorizon)}</p>
                           </div>
                         </>
                       ) : (
@@ -827,11 +873,12 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                           <Info size={24} />
                           <div>
                             <p className="text-xs font-bold">Gap Identified</p>
-                            <p className="text-[10px] opacity-80">You are short by {currencySymbol}{Math.round(freedomNumber - finalBalance).toLocaleString()}. Adjust parameters.</p>
+                            <p className="text-[10px] opacity-80">In year {timelineYears} you are short of your inflation-adjusted Freedom Number ({money(targetAtHorizon)}) by {money(targetAtHorizon - finalBalance)}. Adjust parameters.</p>
                           </div>
                         </>
                       )}
                     </div>
+                    <p className="text-[11px] text-slate-500 leading-relaxed">{assumptionsText}</p>
                   </div>
                 </div>
               </div>
@@ -880,7 +927,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   </svg>
                   <span className="text-2xl font-bold text-slate-900">{Math.round(freedomRatio * 100)}%</span>
                 </div>
-                <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Freedom Ratio</h5>
+                <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Freedom Ratio <InfoTip text={HELP.freedomRatio} /></h5>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Actual Net Worth / Target</p>
                 <div className="mt-4 px-3 py-1 rounded-full bg-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-600">
                   {freedomRatio >= 1 ? 'Freedom Achieved' : freedomRatio > 0.5 ? 'On Track' : 'Early Stages'}
@@ -905,7 +952,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   </svg>
                   <span className="text-2xl font-bold text-slate-900">{Math.round(passiveIncomeRatio * 100)}%</span>
                 </div>
-                <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Passive Income Coverage</h5>
+                <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Passive Income Coverage <InfoTip text={HELP.passiveCoverage} /></h5>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Passive Income / Expenses</p>
                 <div className="mt-4 px-3 py-1 rounded-full bg-emerald-50 text-[10px] font-black uppercase tracking-widest text-emerald-600">
                   {passiveIncomeRatio >= 1 ? 'Fully Covered' : passiveIncomeRatio > 0.2 ? 'Partial Coverage' : 'Building'}
@@ -930,7 +977,7 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
                   </svg>
                   <span className="text-2xl font-bold text-slate-900">{Math.round(savingsRate * 100)}%</span>
                 </div>
-                <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Savings Rate</h5>
+                <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Savings Rate <InfoTip text={HELP.savingsRate} /></h5>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Surplus / Total Income</p>
                 <div className="mt-4 px-3 py-1 rounded-full bg-blue-50 text-[10px] font-black uppercase tracking-widest text-blue-600">
                   {savingsRate >= 0.3 ? 'Excellent' : savingsRate >= 0.15 ? 'Good' : 'Needs Focus'}
@@ -941,23 +988,29 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
             <div className="brand-gradient p-8 rounded-2xl shadow-xl">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 <div>
-                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Net Worth</p>
+                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Net Worth <InfoTip dark text={HELP.netWorth} /></p>
                   <p className="text-2xl font-bold text-white">{currencySymbol}{netWorth.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Freedom Number</p>
+                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Freedom Number <InfoTip dark text={HELP.freedomNumber} /></p>
                   <p className="text-2xl font-bold text-white">{currencySymbol}{freedomNumber.toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Monthly Passive</p>
+                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Monthly Passive <InfoTip dark text={HELP.monthlyPassive} /></p>
                   <p className="text-2xl font-bold text-emerald-400">{currencySymbol}{(localData.monthlyPassiveIncome || 0).toLocaleString()}</p>
                 </div>
                 <div>
-                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2">Time to Freedom</p>
-                  <p className="text-2xl font-bold text-ink">{localData.timelineYears || 20} Years</p>
+                  <p className="text-[10px] font-black text-white uppercase tracking-widest mb-2 flex items-center gap-1.5">Time to Freedom <InfoTip dark text={HELP.timeToFreedom} /></p>
+                  <p className="text-2xl font-bold text-primary">{timeToFreedomText}</p>
+                  {freedomDate && <p className="text-xs text-white/70 mt-1">Projected around {freedomDate}</p>}
+                  {(timeToFreedom.status === 'not-reached' || timeToFreedom.status === 'no-target') && (
+                    <p className="text-xs text-white/70 mt-1 leading-relaxed">{timeToFreedom.reason}</p>
+                  )}
                 </div>
               </div>
             </div>
+
+            <p className="text-xs text-slate-500 leading-relaxed -mt-4">{assumptionsText}</p>
 
             <div className="flex justify-between">
               <button
