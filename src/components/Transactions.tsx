@@ -6,14 +6,12 @@ import { CategorySelect } from './CategorySelect';
 import { Modal } from './Modal';
 import { defaultCategory } from '../lib/categories';
 import type { Transaction } from '../types';
+import { merchantKey } from '../lib/transactions';
 
 type Patch = Partial<Pick<Transaction, 'date' | 'amount' | 'category' | 'description' | 'type'>>;
 
 // Bank descriptions carry card numbers, dates and references, so compare
 // on the words only: "CLICKS PHARMACY 1234 23/10" ≈ "Clicks Pharmacy 5678".
-const merchantKey = (description = '') =>
-  description.toLowerCase().replace(/[^a-z\s]/g, ' ').replace(/\s+/g, ' ').trim();
-
 const monthLabel = (ym: string) => {
   const d = parseISO(`${ym}-01`);
   return isValid(d) ? format(d, 'MMMM yyyy') : ym;
