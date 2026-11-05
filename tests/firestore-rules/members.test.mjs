@@ -22,6 +22,7 @@ const profile = { displayName: 'Bob', bio: '', incomeRange: 'Select', primaryGoa
 await check('profile save before any photo analysis', 'allow', () => setDoc(doc(bob, 'users/bob'), profile, { merge: true }));
 await check('profile save with photo analysis', 'allow', () =>
   setDoc(doc(bob, 'users/bob'), { ...profile, photoAnalysis: { persona: 'P', analysis: 'A', tips: [] } }, { merge: true }));
+await check('save self-assessed enneagram type as a number', 'allow', () => setDoc(doc(bob, 'users/bob'), { enneagramType: 3 }, { merge: true }));
 await check('xp award with increment', 'allow', () => setDoc(doc(bob, 'users/bob'), { xp: increment(10) }, { merge: true }));
 await check('repeat login refreshes identity only', 'allow', () =>
   setDoc(doc(bob, 'users/bob'), { uid: 'bob', email: 'bob@example.com', displayName: 'Bob', photoURL: 'https://x/y.png' }, { merge: true }));

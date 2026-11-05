@@ -25,6 +25,7 @@ import {
 import { AiCoachSection } from './AiCoachSection';
 import { WealthEnneagramTest } from './WealthEnneagramTest';
 import { WealthEnneagramModule } from './WealthEnneagramModule';
+import { parseEnneagramType } from '../lib/enneagram';
 import { MoneyStoryCoach } from './MoneyStoryCoach';
 import { MindsetCoach } from './MindsetCoach';
 import { ENNEAGRAM_TYPES, GratitudeEntry, RitualEntry, MoneyStoryResponse } from '../types';
@@ -207,7 +208,7 @@ export const Mindset = ({
     return tempAnswers[qId] ?? moneyStoryResponses.find(r => r.questionId === qId)?.answer ?? '';
   };
 
-  const currentType = ENNEAGRAM_TYPES.find(t => t.id === userProfile?.enneagramType);
+  const currentType = ENNEAGRAM_TYPES.find(t => t.id === parseEnneagramType(userProfile?.enneagramType));
 
   const renderLanding = () => (
     <div className="space-y-8">
@@ -307,7 +308,11 @@ export const Mindset = ({
               </button>
             </div>
             
-            <WealthEnneagramModule onBack={() => setView('landing')} />
+            <WealthEnneagramModule
+              onBack={() => setView('landing')}
+              savedType={parseEnneagramType(userProfile?.enneagramType)}
+              onSaveType={typeId => updateUserProfile({ enneagramType: typeId })}
+            />
           </motion.div>
         )}
 

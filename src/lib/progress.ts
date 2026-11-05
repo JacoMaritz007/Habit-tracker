@@ -1,4 +1,5 @@
 import { XP_REWARDS, PROGRESS_BADGES, Badge } from '../types';
+import { parseEnneagramType } from './enneagram';
 
 /**
  * Calculates level based on XP using a progressive formula
@@ -77,7 +78,7 @@ export function checkForNewBadges(userProfile: any, context: {
   check('gratitude_pioneer', context.gratitudeEntries.length > 0);
 
   // Badge: wealth_enneagram
-  check('wealth_enneagram', !!userProfile.enneagramType && userProfile.enneagramType !== 'Select your type');
+  check('wealth_enneagram', parseEnneagramType(userProfile.enneagramType) !== null);
 
   // Badge: transaction_master
   check('transaction_master', context.transactions.length >= 50);

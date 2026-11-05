@@ -17,6 +17,7 @@ import {
 import { cn } from '../lib/utils';
 import { User as FirebaseUser } from 'firebase/auth';
 import { analyzeProfilePhoto } from '../services/geminiService';
+import { ENNEAGRAM_NAMES, parseEnneagramType } from '../lib/enneagram';
 
 interface AccountProps {
   user: FirebaseUser | null;
@@ -24,6 +25,7 @@ interface AccountProps {
   updateUserProfile: (data: any) => Promise<void>;
   logout: () => Promise<void>;
   onBack: () => void;
+  onOpenEnneagram?: () => void;
 }
 
 const currencies = [
@@ -57,20 +59,9 @@ const wealthChallenges = [
   'Scarcity Mindset',
 ];
 
-const enneagramTypes = [
-  'Select your type',
-  'Type 1: The Perfectionist',
-  'Type 2: The Helper',
-  'Type 3: The Achiever',
-  'Type 4: The Individualist',
-  'Type 5: The Investigator',
-  'Type 6: The Loyalist',
-  'Type 7: The Enthusiast',
-  'Type 8: The Challenger',
-  'Type 9: The Peacemaker',
-];
 
-export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserProfile, logout, onBack }) => {
+
+export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserProfile, logout, onBack, onOpenEnneagram }) => {
   const [activeTab, setActiveTab] = useState<'profile' | 'wealth' | 'security' | 'preferences'>('profile');
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
@@ -83,7 +74,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
   const [incomeRange, setIncomeRange] = useState(userProfile?.incomeRange || 'Select a range');
   const [primaryGoal, setPrimaryGoal] = useState(userProfile?.primaryGoal || '');
   const [wealthChallenge, setWealthChallenge] = useState(userProfile?.wealthChallenge || 'Select your challenge');
-  const [enneagramType, setEnneagramType] = useState(userProfile?.enneagramType || 'Select your type');
+  const [enneagramType, setEnneagramType] = useState<number | null>(parseEnneagramType(userProfile?.enneagramType));
   const [currency, setCurrency] = useState(userProfile?.currency || 'USD');
 
   const handleSave = async (e?: React.FormEvent) => {
@@ -97,7 +88,7 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
         incomeRange,
         primaryGoal,
         wealthChallenge,
-        enneagramType,
+        ...(enneagramType ? { enneagramType } : {}),
         currency,
         ...(analysisResult ? { photoAnalysis: analysisResult } : {}),
       });
@@ -368,14 +359,15 @@ export const Account: React.FC<AccountProps> = ({ user, userProfile, updateUserP
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Enneagram Money Type</label>
                   <select
-                    value={enneagramType}
-                    onChange={(e) => setEnneagramType(e.target.value)}
+                    value={enneagramType ?? ''}
+                    onChange={(e) => setEnneagramType(e.target.value ? Number(e.target.value) : null)}
                     className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-2xl text-sm focus:ring-2 focus:ring-focus/30 focus:border-transparent outline-none transition-all appearance-none"
                   >
-                    {enneagramTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                    <option value="">Select your type</option>
+                    {Object.entries(ENNEAGRAM_NAMES).map(([n, name]) => <option key={n} value={n}>Type {n}: {name}</option>)}
                   </select>
                   <p className="text-[10px] text-slate-400 mt-2">
-                    Don't know yours? <button type="button" className="text-ink hover:underline">Take the Wealth Enneagram Test</button>
+                    Don't know yours? <button type="button" onClick={onOpenEnneagram} className="text-ink font-semibold hover:underline">Take the Wealth Enneagram Test</button>
                   </p>
                 </div>
               </div>
