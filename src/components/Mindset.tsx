@@ -218,7 +218,7 @@ export const Mindset = ({
             <BrainCircuit size={24} />
           </div>
           <div>
-            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Mindset Money</h3>
+            <h3 className="text-2xl font-bold text-slate-900 tracking-tight">Money Mindset</h3>
             <p className="text-sm text-slate-500">Four practices to transform your relationship with wealth.</p>
           </div>
         </div>
