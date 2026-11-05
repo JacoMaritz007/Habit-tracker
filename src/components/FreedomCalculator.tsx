@@ -35,6 +35,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { FreedomCalculatorData, FreedomGoal } from '../types';
 import { freedomNumber as calcFreedomNumber, project, formatDuration, MAX_YEARS } from '../lib/freedom';
 import { InfoTip } from './InfoTip';
+import { RingGauge } from './RingGauge';
 import { cn } from '../lib/utils';
 
 interface FreedomCalculatorProps {
@@ -911,21 +912,8 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {/* Freedom Ratio */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-                <div className="w-32 h-32 rounded-full border-8 border-slate-100 flex items-center justify-center relative mb-4">
-                  <svg className="absolute inset-0 w-full h-full -rotate-90">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      fill="transparent"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      strokeDasharray={351.8}
-                      strokeDashoffset={351.8 * (1 - Math.min(1, freedomRatio))}
-                      className="text-ink"
-                    />
-                  </svg>
-                  <span className="text-2xl font-bold text-slate-900">{Math.round(freedomRatio * 100)}%</span>
+                <div className="mb-4">
+                  <RingGauge value={freedomRatio} className="text-primary" label={<span className="text-2xl font-bold text-slate-900">{Math.round(freedomRatio * 100)}%</span>} />
                 </div>
                 <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Freedom Ratio <InfoTip text={HELP.freedomRatio} /></h5>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Actual Net Worth / Target</p>
@@ -936,21 +924,8 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
 
               {/* Passive Income Ratio */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-                <div className="w-32 h-32 rounded-full border-8 border-slate-100 flex items-center justify-center relative mb-4">
-                  <svg className="absolute inset-0 w-full h-full -rotate-90">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      fill="transparent"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      strokeDasharray={351.8}
-                      strokeDashoffset={351.8 * (1 - Math.min(1, passiveIncomeRatio))}
-                      className="text-emerald-500"
-                    />
-                  </svg>
-                  <span className="text-2xl font-bold text-slate-900">{Math.round(passiveIncomeRatio * 100)}%</span>
+                <div className="mb-4">
+                  <RingGauge value={passiveIncomeRatio} className="text-emerald-500" label={<span className="text-2xl font-bold text-slate-900">{Math.round(passiveIncomeRatio * 100)}%</span>} />
                 </div>
                 <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Passive Income Coverage <InfoTip text={HELP.passiveCoverage} /></h5>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Passive Income / Expenses</p>
@@ -961,21 +936,8 @@ export const FreedomCalculator: React.FC<FreedomCalculatorProps> = ({ data, onSa
 
               {/* Savings Rate */}
               <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col items-center text-center">
-                <div className="w-32 h-32 rounded-full border-8 border-slate-100 flex items-center justify-center relative mb-4">
-                  <svg className="absolute inset-0 w-full h-full -rotate-90">
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r="56"
-                      fill="transparent"
-                      stroke="currentColor"
-                      strokeWidth="8"
-                      strokeDasharray={351.8}
-                      strokeDashoffset={351.8 * (1 - Math.min(1, savingsRate))}
-                      className="text-blue-500"
-                    />
-                  </svg>
-                  <span className="text-2xl font-bold text-slate-900">{Math.round(savingsRate * 100)}%</span>
+                <div className="mb-4">
+                  <RingGauge value={savingsRate} className="text-blue-500" label={<span className="text-2xl font-bold text-slate-900">{Math.round(savingsRate * 100)}%</span>} />
                 </div>
                 <h5 className="text-sm font-bold text-slate-900 uppercase tracking-wider mb-1">Savings Rate <InfoTip text={HELP.savingsRate} /></h5>
                 <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest">Surplus / Total Income</p>
