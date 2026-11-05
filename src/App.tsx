@@ -815,6 +815,7 @@ export default function App() {
         isOpen={isTransactionModalOpen} 
         onClose={() => setIsTransactionModalOpen(false)} 
         onAdd={addTransactions}
+        transactions={transactions}
         currency={userProfile?.currency}
       />
       <HabitModal 
