@@ -30,17 +30,27 @@ export function getLevelProgress(xp: number): number {
 }
 
 /**
- * Rank titles based on levels
+ * Ranks: a new title every few levels. Used by getRankTitle and the levels
+ * legend, so the two can never disagree.
  */
+export const RANKS = [
+  { title: 'Wealth Novice', fromLevel: 1, meaning: 'Getting started: tracking money, setting first habits and goals.' },
+  { title: 'Financial Apprentice', fromLevel: 5, meaning: 'Building routine: habits done most days, spending understood.' },
+  { title: 'Money Manager', fromLevel: 10, meaning: 'In control: a budget you follow, goals funded every month.' },
+  { title: 'Wealth Builder', fromLevel: 20, meaning: 'Growing assets: consistent investing and a clear freedom plan.' },
+  { title: 'Prosperity Pro', fromLevel: 35, meaning: 'Momentum: long streaks, goals reached, mindset work done.' },
+  { title: 'Financial Strategist', fromLevel: 50, meaning: 'Thinking long term: optimising your plan and reviewing it on rhythm.' },
+  { title: 'Abundance Master', fromLevel: 75, meaning: 'Living the habits: wealth-building is second nature.' },
+  { title: 'Wealth Legend', fromLevel: 100, meaning: 'The top rank: years of consistent wealth habits.' },
+] as const;
+
 export function getRankTitle(level: number): string {
-  if (level < 5) return 'Wealth Novice';
-  if (level < 10) return 'Financial Apprentice';
-  if (level < 20) return 'Money Manager';
-  if (level < 35) return 'Wealth Builder';
-  if (level < 50) return 'Prosperity Pro';
-  if (level < 75) return 'Financial Strategist';
-  if (level < 100) return 'Abundance Master';
-  return 'Wealth Legend';
+  return [...RANKS].reverse().find(r => level >= r.fromLevel)!.title;
+}
+
+/** The rank after the given level's rank, or null at the top. */
+export function getNextRank(level: number) {
+  return RANKS.find(r => r.fromLevel > level) ?? null;
 }
 
 /**
