@@ -69,7 +69,7 @@ export type UserProfile = {
   incomeRange?: string;
   primaryGoal?: string;
   wealthChallenge?: string;
-  enneagramType?: string;
+  enneagramType?: number | string; // 1–9; older profiles may hold text
   photoAnalysis?: any;
 };
 
@@ -165,14 +165,14 @@ export type FreedomCalculatorData = {
 
 export const ENNEAGRAM_TYPES: EnneagramType[] = [
   { id: 1, title: 'The Principled Saver', description: 'Disciplined and ethical with money, but can be overly rigid.' },
-  { id: 2, title: 'The Generous Spender', description: 'Uses money to help others, sometimes neglecting own needs.' },
-  { id: 3, title: 'The Success-Driven Investor', description: 'Views wealth as a measure of achievement and status.' },
-  { id: 4, title: 'The Aesthete Spender', description: 'Values unique experiences and beauty over practical savings.' },
-  { id: 5, title: 'The Knowledge-Seeking Hoarder', description: 'Accumulates wealth for security and independence through information.' },
-  { id: 6, title: 'The Cautious Planner', description: 'Motivated by security and fear of future contingencies.' },
-  { id: 7, title: 'The Spontaneous Optimist', description: 'Spends on new experiences and avoids financial constraints.' },
-  { id: 8, title: 'The Financial Protector', description: 'Uses wealth to protect themselves and their inner circle.' },
-  { id: 9, title: 'The Complacent Avoider', description: 'Avoids financial stress and conflict by ignoring money matters.' },
+  { id: 2, title: 'The Generous Helper', description: 'Uses money to help others, sometimes neglecting own needs.' },
+  { id: 3, title: 'The Goal Achiever', description: 'Views wealth as a measure of achievement and status.' },
+  { id: 4, title: 'The Creative Individualist', description: 'Values unique experiences and beauty over practical savings.' },
+  { id: 5, title: 'The Analytical Investigator', description: 'Accumulates wealth for security and independence through information.' },
+  { id: 6, title: 'The Cautious Loyalist', description: 'Motivated by security and fear of future contingencies.' },
+  { id: 7, title: 'The Visionary Enthusiast', description: 'Spends on new experiences and avoids financial constraints.' },
+  { id: 8, title: 'The Decisive Challenger', description: 'Uses wealth to protect themselves and their inner circle.' },
+  { id: 9, title: 'The Steady Peacemaker', description: 'Avoids financial stress and conflict by ignoring money matters.' },
 ];
 
 export type NotificationType = 'welcome' | 'level_up' | 'badge' | 'goal_complete' | 'streak' | 'announcement' | 'support_reply';

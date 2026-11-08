@@ -23,6 +23,7 @@ import { Support } from './components/Support';
 import { AdminSupport } from './components/AdminSupport';
 import { subscribeAllTickets } from './services/support';
 import { isAdminUser } from './lib/admin';
+import { enneagramLabel, parseEnneagramType } from './lib/enneagram';
 import { cn } from './lib/utils';
 import { 
   Transaction, 
@@ -447,8 +448,8 @@ export default function App() {
   const updateUserProfile = async (data: any) => {
     if (!user) return;
     try {
-      const wasEnneagramSet = !!userProfile?.enneagramType && userProfile.enneagramType !== 'Select your type';
-      const isEnneagramSetting = !!data.enneagramType && data.enneagramType !== 'Select your type';
+      const wasEnneagramSet = parseEnneagramType(userProfile?.enneagramType) !== null;
+      const isEnneagramSetting = parseEnneagramType(data.enneagramType) !== null;
       
       const wasPhotoAnalyzed = !!userProfile?.photoAnalysis;
       const isPhotoAnalyzing = !!data.photoAnalysis;
@@ -526,7 +527,7 @@ export default function App() {
 
   const handleSuggestAdvice = async (msg: string) => {
     try {
-      const type = userProfile?.enneagramType ? `Type ${userProfile.enneagramType}` : 'Unknown Type';
+      const type = enneagramLabel(userProfile?.enneagramType) ?? 'Unknown Type';
       const advice = await getEnneagramAdvice(type, msg);
       return { message: advice, habits: [] };
     } catch (e) {
@@ -825,6 +826,7 @@ export default function App() {
                     updateUserProfile={updateUserProfile}
                     logout={logout}
                     onBack={() => setActiveTab('dashboard')}
+                    onOpenEnneagram={() => setActiveTab('mindset-enneagram')}
                   />
                 </motion.div>
               )}

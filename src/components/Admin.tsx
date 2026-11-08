@@ -12,6 +12,7 @@ import { cn } from '../lib/utils';
 import { calculateLevel } from '../lib/progress';
 import { Modal } from './Modal';
 import type { Goal, Habit } from '../types';
+import { enneagramLabel } from '../lib/enneagram';
 
 type AdminUser = {
   id: string;
@@ -108,7 +109,7 @@ export const Admin = ({ currentUid }: { currentUid: string }) => {
       level: calculateLevel(u.xp || 0),
       xp: u.xp || 0,
       badges: (u.badges || []).length,
-      enneagram: hasValue(u.enneagramType) ? u.enneagramType : '',
+      enneagram: enneagramLabel(u.enneagramType) ?? '',
       primaryGoal: hasValue(u.primaryGoal) ? u.primaryGoal : '',
       wealthChallenge: hasValue(u.wealthChallenge) ? u.wealthChallenge : '',
       incomeRange: hasValue(u.incomeRange) ? u.incomeRange : '',
@@ -212,7 +213,7 @@ export const Admin = ({ currentUid }: { currentUid: string }) => {
                   <td className="whitespace-nowrap text-slate-600">{toDate(u) ? format(toDate(u)!, 'd MMM yyyy') : '—'}</td>
                   <td className="is-num font-semibold">{calculateLevel(u.xp || 0)}</td>
                   <td className="is-num">{u.xp || 0}</td>
-                  <td>{hasValue(u.enneagramType) ? `Type ${u.enneagramType}` : <span className="text-slate-400">—</span>}</td>
+                  <td>{enneagramLabel(u.enneagramType) ?? <span className="text-slate-400">—</span>}</td>
                   <td>
                     {u.role === 'admin'
                       ? <span className="wh-chip wh-chip--orange">Admin</span>
@@ -278,7 +279,7 @@ const UserDetail = ({ user, currentUid, onClose, onSetRole, onNotify }: {
     ['Primary goal', user.primaryGoal],
     ['Wealth challenge', user.wealthChallenge],
     ['Income range', user.incomeRange],
-    ['Enneagram', hasValue(user.enneagramType) ? `Type ${user.enneagramType}` : undefined],
+    ['Enneagram', enneagramLabel(user.enneagramType) ?? undefined],
     ['Currency', user.currency],
   ];
 
