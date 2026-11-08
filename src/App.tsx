@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, LogOut, MessageSquare, Menu, X } from 'lucide-react';
+import { LogOut, MessageSquare, Menu, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import { onAuthStateChanged, User } from 'firebase/auth';
 import { collection, query, where, onSnapshot, doc, getDoc, setDoc, addDoc, deleteDoc, serverTimestamp, increment } from 'firebase/firestore';
@@ -29,10 +29,15 @@ import {
   MoneyStoryResponse,
   FreedomCalculatorData,
   XP_REWARDS,
-  UserProfile
+  UserProfile,
+  PROGRESS_BADGES
 } from './types';
 import { getFinancialInsights, getHabitSuggestions, getEnneagramAdvice, getGoalBrainstorming, getMoneyStoryAdvice } from './services/geminiService';
-import { calculateLevel, checkForNewBadges } from './lib/progress';
+import { calculateLevel, checkForNewBadges, getRankTitle } from './lib/progress';
+import { notify } from './services/notifications';
+import { NotificationBell } from './components/NotificationBell';
+
+const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100];
 
 export default function App() {
   const [user, setUser] = useState<User | null>(null);
@@ -90,6 +95,8 @@ export default function App() {
               badges: [],
               createdAt: serverTimestamp()
             });
+            notify(currentUser.uid, 'welcome', 'Welcome to Wealth Habits',
+              'Start by adding your first habit and setting a goal. Small daily actions compound into wealth.');
           }
         } catch (error) {
           handleFirestoreError(error, OperationType.WRITE, `users/${currentUser.uid}`);
@@ -197,6 +204,11 @@ export default function App() {
       
       if (!isCompleted) {
         awardXP(XP_REWARDS.HABIT_COMPLETE, 'completing a habit');
+        const newStreak = habit.streak + 1;
+        if (STREAK_MILESTONES.includes(newStreak)) {
+          notify(user.uid, 'streak', `${newStreak}-day streak!`,
+            `You've kept "${habit.title}" going for ${newStreak} days in a row.`);
+        }
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `habits/${id}`);
@@ -276,6 +288,8 @@ export default function App() {
       
       if (isNowComplete && !wasComplete) {
         awardXP(XP_REWARDS.GOAL_COMPLETE, 'achieving a goal');
+        notify(user.uid, 'goal_complete', `Goal reached: ${goal!.title}`,
+          'You hit your target. Time to celebrate, then set your next goal.');
       }
     } catch (error) {
       handleFirestoreError(error, OperationType.UPDATE, `goals/${id}`);
@@ -412,6 +426,8 @@ export default function App() {
     const updateData: any = { xp: increment(amount) };
     if (newLevel > oldLevel) {
       updateData.level = newLevel;
+      notify(user.uid, 'level_up', `You reached level ${newLevel}`,
+        `You're now a ${getRankTitle(newLevel)}. Keep building.`);
       // Level up logic could go here (notifications etc)
       console.log(`Level Up! You are now level ${newLevel}`);
     }
@@ -440,7 +456,10 @@ export default function App() {
       updateUserProfile({
         badges: [...currentBadges, ...newBadgeIds]
       });
-      console.log(`Unlocked Badges: ${newBadgeIds.join(', ')}`);
+      newBadgeIds.forEach(id => {
+        const badge = PROGRESS_BADGES.find(b => b.id === id);
+        if (badge) notify(user.uid, 'badge', `Badge unlocked: ${badge.title}`, badge.description);
+      });
     }
   }, [user, habits, transactions, goals, moneyStoryResponses, gratitudeEntries]);
 
@@ -555,9 +574,7 @@ export default function App() {
                 <MessageSquare size={20} className="group-hover:scale-110 transition-transform" />
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-brand-accent rounded-full border-2 border-white animate-pulse"></span>
               </button>
-              <button className="p-2 text-slate-400 hover:text-slate-600 transition-colors relative">
-                <Bell size={20} />
-              </button>
+              <NotificationBell userId={user.uid} />
               <div className="flex items-center gap-3 pl-4 border-l border-slate-200">
                 <div className="text-right hidden sm:block">
                   <p className="text-sm font-bold text-slate-900">{user.displayName}</p>

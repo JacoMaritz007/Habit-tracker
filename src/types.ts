@@ -174,3 +174,16 @@ export const ENNEAGRAM_TYPES: EnneagramType[] = [
   { id: 8, title: 'The Financial Protector', description: 'Uses wealth to protect themselves and their inner circle.' },
   { id: 9, title: 'The Complacent Avoider', description: 'Avoids financial stress and conflict by ignoring money matters.' },
 ];
+
+export type NotificationType = 'welcome' | 'level_up' | 'badge' | 'goal_complete' | 'streak' | 'announcement';
+
+export type AppNotification = {
+  id: string;
+  userId: string;
+  type: NotificationType;
+  title: string;
+  body: string;
+  read: boolean;
+  createdAt?: { toDate: () => Date } | null;
+  sentBy?: string;
+};
