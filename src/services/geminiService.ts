@@ -1,4 +1,19 @@
 import { ai } from "./geminiClient";
+import { categoryListForPrompt, normalizeCategory } from "../lib/categories";
+import type { Transaction } from "../types";
+
+// Force AI categories onto the shared list and clean up each row.
+const tidy = (rows: any[]): Omit<Transaction, 'id'>[] =>
+  (Array.isArray(rows) ? rows : []).map(r => {
+    const type: Transaction['type'] = r?.type === 'income' ? 'income' : 'expense';
+    return {
+      date: String(r?.date ?? ''),
+      description: String(r?.description ?? ''),
+      amount: Math.abs(Number(r?.amount) || 0),
+      type,
+      category: normalizeCategory(r?.category, type),
+    };
+  });
 
 export async function getFinancialInsights(data: any) {
   const model = ai.models.generateContent({
@@ -82,7 +97,9 @@ export async function classifyRawCsv(csvText: string) {
     model: "gemini-3-flash-preview",
     contents: `Parse and classify these bank transactions from the following raw CSV data. 
     Identify the date, description, and amount for each transaction. 
-    Classify each into categories (e.g., Groceries, Rent, Salary, Entertainment, Utilities, Transport, Healthcare, Shopping, Dining Out, Other). 
+    Classify each into exactly one category from this list, spelled exactly as written:
+    ${categoryListForPrompt()}
+    Use the description to decide, e.g. pharmacies and doctors are Medical & Pharmacy, stationery stores are Office Supplies.
     Determine if each is an 'income' or 'expense'.
     
     Raw CSV Data:
@@ -95,7 +112,7 @@ export async function classifyRawCsv(csvText: string) {
     - 'amount' is a positive number.
     - 'type' is either 'income' or 'expense'.
     - 'date' is in YYYY-MM-DD format.
-    - 'category' is a sensible financial category.
+    - 'category' is one of the listed categories for its type.
     - 'description' is the original payee/memo from the CSV.`,
     config: { 
       responseMimeType: "application/json",
@@ -103,13 +120,14 @@ export async function classifyRawCsv(csvText: string) {
     }
   });
   const result = await model;
-  return JSON.parse(result.text || "[]");
+  return tidy(JSON.parse(result.text || "[]"));
 }
 
 export async function classifyTransactions(transactions: { date: string, description: string, amount: number }[]) {
   const model = ai.models.generateContent({
     model: "gemini-3-flash-preview",
-    contents: `Classify these bank transactions into categories (e.g., Groceries, Rent, Salary, Entertainment, Utilities, Transport, Healthcare, Shopping, Dining Out, Other). 
+    contents: `Classify each of these bank transactions into exactly one category from this list, spelled exactly as written:
+    ${categoryListForPrompt()}
     Also determine if each is an 'income' or 'expense'. Usually, negative amounts are expenses and positive are income, but use the description to be sure.
     Transactions: ${JSON.stringify(transactions)}.
     Return as a JSON array of objects with {date, amount, category, description, type}. 
@@ -121,7 +139,7 @@ export async function classifyTransactions(transactions: { date: string, descrip
     }
   });
   const result = await model;
-  return JSON.parse(result.text || "[]");
+  return tidy(JSON.parse(result.text || "[]"));
 }
 
 export async function analyzeProfilePhoto(base64Image: string, mimeType: string) {

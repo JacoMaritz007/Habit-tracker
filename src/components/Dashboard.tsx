@@ -1,14 +1,5 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { 
-  BarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  ResponsiveContainer
-} from 'recharts';
 import { Plus, Sparkles, PieChart as PieChartIcon, Wallet, TrendingUp, TrendingDown, LayoutGrid } from 'lucide-react';
 import { StatCard } from './StatCard';
 import { cn, formatCurrency } from '../lib/utils';
@@ -16,13 +7,14 @@ import { Transaction, Goal } from '../types';
 import { ProgressIndicator } from './ProgressIndicator';
 import { BadgesGrid } from './BadgesGrid';
 
-export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTransaction, onDeleteTransaction, currency, userProfile }: { 
+export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTransaction, onDeleteTransaction, onViewAllTransactions, currency, userProfile }: { 
   transactions: Transaction[], 
   goals: Goal[], 
   insights: string[], 
   isAiLoading: boolean,
   onAddTransaction: () => void,
   onDeleteTransaction: (id: string) => Promise<void>,
+  onViewAllTransactions: () => void,
   currency?: string,
   userProfile: any
 }) => {
@@ -37,7 +29,19 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
       return acc;
     }, {});
 
-  const chartData = Object.entries(spendingByCategory).map(([name, value]) => ({ name, value }));
+  // Ranked spending: top categories individually, the long tail grouped.
+  const ranked = Object.entries(spendingByCategory as Record<string, number>)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+  const TOP = 8;
+  const chartData = ranked.length > TOP + 1
+    ? [...ranked.slice(0, TOP), { name: `${ranked.length - TOP} more categories`, value: ranked.slice(TOP).reduce((a, r) => a + r.value, 0) }]
+    : ranked;
+
+  const thisMonth = new Date().toISOString().slice(0, 7);
+  const spendingMtd = transactions
+    .filter(t => t.type === 'expense' && t.date?.startsWith(thisMonth))
+    .reduce((acc, t) => acc + t.amount, 0);
 
   // Sort transactions by date descending
   const recentTransactions = [...transactions].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()).slice(0, 5);
@@ -53,7 +57,7 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
         <StatCard title="Net" value={netWorth} icon={Wallet} color="brand" currency={currency} />
         <StatCard title="Total Income" value={totalIncome} icon={TrendingUp} color="emerald" currency={currency} />
         <StatCard title="Total Spending" value={-totalExpense} icon={TrendingDown} color="rose" currency={currency} />
-        <StatCard title="Spending (MTD)" value={totalExpense} icon={PieChartIcon} color="accent" currency={currency} />
+        <StatCard title="Spending (MTD)" value={spendingMtd} icon={PieChartIcon} color="accent" currency={currency} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -74,8 +78,8 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
             <div className="flex items-center justify-between mb-6">
               <div>
-                <h3 className="text-lg font-bold text-slate-900">Spending Analysis</h3>
-                <p className="text-sm text-slate-500">A breakdown of your spending by category.</p>
+                <h3 className="text-lg font-bold text-slate-900">Spending by category</h3>
+                <p className="text-sm text-slate-500">Where your money goes, largest first.</p>
               </div>
               <button 
                 onClick={onAddTransaction}
@@ -85,23 +89,29 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
               </button>
             </div>
             
-            <div className="h-64">
+            <div>
               {chartData.length > 0 ? (
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E1E6EB" />
-                    <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#7B8794' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fill: '#7B8794' }} />
-                    <Tooltip 
-                      cursor={{ fill: '#F4F6F8' }}
-                      contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)' }}
-                      formatter={(value: number) => [formatCurrency(value, currency), 'Amount']}
-                    />
-                    <Bar dataKey="value" fill="#F47C20" radius={[4, 4, 0, 0]} barSize={40} />
-                  </BarChart>
-                </ResponsiveContainer>
+                <ul className="space-y-3">
+                  {chartData.map(row => {
+                    const pct = totalExpense ? (row.value / totalExpense) * 100 : 0;
+                    return (
+                      <li key={row.name}>
+                        <div className="flex items-baseline justify-between gap-3 text-sm mb-1">
+                          <span className="font-medium text-ink truncate">{row.name}</span>
+                          <span className="whitespace-nowrap tabular-nums">
+                            <span className="font-semibold text-ink">{formatCurrency(row.value, currency)}</span>
+                            <span className="text-slate-500 ml-2 inline-block w-11 text-right">{pct.toFixed(pct < 10 ? 1 : 0)}%</span>
+                          </span>
+                        </div>
+                        <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
+                          <div className="h-full rounded-full bg-primary" style={{ width: `${Math.max(pct, 1)}%` }} />
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
               ) : (
-                <div className="h-full flex flex-col items-center justify-center text-slate-400">
+                <div className="h-64 flex flex-col items-center justify-center text-slate-400">
                   <PieChartIcon size={48} className="mb-2 opacity-20" />
                   <p className="text-sm">No transactions yet.</p>
                 </div>
@@ -110,7 +120,14 @@ export const Dashboard = ({ transactions, goals, insights, isAiLoading, onAddTra
           </div>
 
           <div className="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-900 mb-6">Recent Transactions</h3>
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="text-lg font-bold text-slate-900">Recent Transactions</h3>
+              {transactions.length > 0 && (
+                <button onClick={onViewAllTransactions} className="text-sm font-semibold text-focus hover:text-blue-700">
+                  View all & edit ({transactions.length}) →
+                </button>
+              )}
+            </div>
             <div className="space-y-4">
               {recentTransactions.length > 0 ? (
                 recentTransactions.map((t) => (
