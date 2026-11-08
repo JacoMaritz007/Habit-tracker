@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Modal } from './Modal';
 import { Transaction } from '../types';
-import { TrendingUp, TrendingDown, Plus, Upload, FileText, X, AlertCircle, Sparkles, ArrowLeft, Trash2 } from 'lucide-react';
+import { TrendingUp, TrendingDown, Plus, Upload, FileText, X, AlertCircle, Sparkles, ArrowLeft, Trash2, Copy } from 'lucide-react';
 import { cn, formatCurrency } from '../lib/utils';
 import { CategorySelect } from './CategorySelect';
 import { defaultCategory } from '../lib/categories';
+import { findDuplicates, DuplicateReason } from '../lib/transactions';
 import Papa from 'papaparse';
 import { classifyTransactions, classifyRawCsv } from '../services/geminiService';
 
@@ -12,14 +13,17 @@ interface TransactionModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAdd: (transaction: Omit<Transaction, 'id'> | Omit<Transaction, 'id'>[]) => Promise<void>;
+  // Already-saved transactions, used to spot duplicates in an import.
+  transactions?: Transaction[];
   currency?: string;
 }
 
-type Draft = Omit<Transaction, 'id'> & { key: number; selected: boolean };
+// `selected` is for bulk edits; `include` decides whether the row is saved.
+type Draft = Omit<Transaction, 'id'> & { key: number; selected: boolean; include: boolean; duplicate: DuplicateReason | null };
 
 const CURRENCY_SYMBOLS: Record<string, string> = { USD: '$', EUR: '€', GBP: '£', ZAR: 'R', AUD: 'A$', CAD: 'C$', INR: '₹', JPY: '¥' };
 
-export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, onAdd, currency = 'USD' }) => {
+export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onClose, onAdd, transactions = [], currency = 'USD' }) => {
   const [activeTab, setActiveTab] = useState<'manual' | 'upload'>('manual');
   const [type, setType] = useState<'income' | 'expense'>('expense');
   const [amount, setAmount] = useState('');
@@ -57,11 +61,12 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
   const bulkType = selectedDrafts.length && selectedDrafts.every(d => d.type === selectedDrafts[0].type) ? selectedDrafts[0].type : null;
 
   const saveDrafts = async () => {
-    if (!drafts?.length) return;
+    const toSave = drafts?.filter(d => d.include) ?? [];
+    if (!toSave.length) return;
     setImporting(true);
     setError(null);
     try {
-      await onAdd(drafts.map(({ key, selected, ...t }) => t));
+      await onAdd(toSave.map(({ key, selected, include, duplicate, ...t }) => t));
       close();
     } catch (err: any) {
       console.error(err);
@@ -129,7 +134,9 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
         }
 
         // Show the review step; nothing is saved until the user confirms.
-        setDrafts(classifiedTransactions.map((t, i) => ({ ...t, key: i, selected: false })));
+        // Likely duplicates start excluded; the user can include them anyway.
+        const dupes = findDuplicates(classifiedTransactions, transactions);
+        setDrafts(classifiedTransactions.map((t, i) => ({ ...t, key: i, selected: false, duplicate: dupes[i], include: !dupes[i] })));
       } catch (err: any) {
         console.error(err);
         setError(err.message || 'Failed to process CSV. Please check the file format.');
@@ -164,6 +171,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
             setBulkCategory('');
           }}
           onRemove={key => setDrafts(ds => ds && ds.filter(d => d.key !== key))}
+          onIncludeDuplicates={() => setDrafts(ds => ds && ds.map(d => (d.duplicate ? { ...d, include: true } : d)))}
           onBack={() => setDrafts(null)}
           onSave={saveDrafts}
         />
@@ -357,7 +365,7 @@ export const TransactionModal: React.FC<TransactionModalProps> = ({ isOpen, onCl
 
 const ReviewStep = ({
   drafts, currency, importing, error, selectedCount, bulkType, bulkCategory, setBulkCategory,
-  onUpdate, onToggleAll, onApplyBulk, onRemove, onBack, onSave,
+  onUpdate, onToggleAll, onApplyBulk, onRemove, onIncludeDuplicates, onBack, onSave,
 }: {
   drafts: Draft[];
   currency: string;
@@ -371,18 +379,22 @@ const ReviewStep = ({
   onToggleAll: (on: boolean) => void;
   onApplyBulk: () => void;
   onRemove: (key: number) => void;
+  onIncludeDuplicates: () => void;
   onBack: () => void;
   onSave: () => void;
 }) => {
-  const income = drafts.filter(d => d.type === 'income').reduce((a, d) => a + d.amount, 0);
-  const expense = drafts.filter(d => d.type === 'expense').reduce((a, d) => a + d.amount, 0);
+  const included = drafts.filter(d => d.include);
+  const income = included.filter(d => d.type === 'income').reduce((a, d) => a + d.amount, 0);
+  const expense = included.filter(d => d.type === 'expense').reduce((a, d) => a + d.amount, 0);
+  const skippedDupes = drafts.filter(d => d.duplicate && !d.include).length;
   const allSelected = drafts.length > 0 && selectedCount === drafts.length;
 
   return (
     <div className="space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-600">
-          <span className="font-semibold text-ink">{drafts.length} transactions</span> found ·
+          <span className="font-semibold text-ink">{drafts.length} transactions</span> found
+          {included.length !== drafts.length && <>, <span className="font-semibold text-ink">{included.length}</span> to import</>} ·
           {' '}<span className="text-emerald-600 font-semibold">{formatCurrency(income, currency)}</span> in ·
           {' '}<span className="text-rose-600 font-semibold">{formatCurrency(expense, currency)}</span> out.
           {' '}Check the categories, then save.
@@ -403,6 +415,19 @@ const ReviewStep = ({
         )}
       </div>
 
+      {skippedDupes > 0 && (
+        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 p-3 bg-amber-50 text-amber-800 rounded-xl border border-amber-200 text-sm">
+          <Copy size={15} className="shrink-0" />
+          <span>
+            <span className="font-semibold">{skippedDupes} {skippedDupes === 1 ? 'looks like a duplicate' : 'look like duplicates'}</span>
+            {' '}and will be skipped.
+          </span>
+          <button onClick={onIncludeDuplicates} className="font-semibold underline underline-offset-2 hover:text-amber-900">
+            Include {skippedDupes === 1 ? 'it' : 'them'} anyway
+          </button>
+        </div>
+      )}
+
       <div className="max-h-[55vh] overflow-auto custom-scrollbar border border-slate-200 rounded-xl">
         <table className="wh-table">
           <thead className="sticky top-0 z-10">
@@ -413,15 +438,26 @@ const ReviewStep = ({
               <th>Type</th>
               <th>Category</th>
               <th className="is-num">Amount</th>
+              <th className="w-28">Import</th>
               <th className="w-8"></th>
             </tr>
           </thead>
           <tbody>
             {drafts.map(d => (
-              <tr key={d.key}>
+              <tr key={d.key} className={cn(!d.include && 'opacity-50')}>
                 <td><input type="checkbox" checked={d.selected} onChange={e => onUpdate(d.key, { selected: e.target.checked })} aria-label={`Select ${d.description}`} /></td>
                 <td className="whitespace-nowrap text-slate-600">{d.date}</td>
-                <td className="max-w-[260px] truncate" title={d.description}>{d.description || '—'}</td>
+                <td className="max-w-[260px]">
+                  <div className="truncate" title={d.description}>{d.description || '—'}</div>
+                  {d.duplicate && (
+                    <span className="inline-flex items-center gap-1 mt-1 px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[11px] font-semibold"
+                      title={d.duplicate === 'existing'
+                        ? 'You already have a transaction with this date, amount and description.'
+                        : 'An earlier row in this file has the same date, amount and description.'}>
+                      <Copy size={11} /> Possible duplicate{d.duplicate === 'file' ? ' in this file' : ''}
+                    </span>
+                  )}
+                </td>
                 <td>
                   <select value={d.type} onChange={e => onUpdate(d.key, { type: e.target.value as Draft['type'] })}
                     className={cn('wh-select !h-9 !text-sm !pl-3 !w-28', d.type === 'income' ? 'text-emerald-600' : 'text-rose-600')} aria-label="Type">
@@ -434,6 +470,12 @@ const ReviewStep = ({
                 </td>
                 <td className={cn('is-num font-semibold whitespace-nowrap', d.type === 'income' ? 'text-emerald-600' : 'text-ink')}>
                   {formatCurrency(d.amount, currency)}
+                </td>
+                <td>
+                  <label className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 cursor-pointer whitespace-nowrap">
+                    <input type="checkbox" checked={d.include} onChange={e => onUpdate(d.key, { include: e.target.checked })} aria-label={`Import ${d.description}`} />
+                    {d.include ? 'Import' : 'Skip'}
+                  </label>
                 </td>
                 <td>
                   <button onClick={() => onRemove(d.key)} className="p-1.5 text-slate-400 hover:text-rose-500" aria-label="Remove from import">
@@ -457,9 +499,9 @@ const ReviewStep = ({
         <button onClick={onBack} className="flex items-center gap-2 h-11 px-4 rounded-full text-sm font-semibold text-ink hover:bg-slate-100">
           <ArrowLeft size={16} /> Choose another file
         </button>
-        <button onClick={onSave} disabled={importing || !drafts.length}
+        <button onClick={onSave} disabled={importing || !included.length}
           className="flex items-center gap-2 h-11 px-6 rounded-full bg-primary text-white text-sm font-semibold hover:bg-primary-hover disabled:opacity-50 shadow-[0_8px_22px_rgba(244,124,32,.32)]">
-          {importing ? 'Saving…' : `Save ${drafts.length} transactions`}
+          {importing ? 'Saving…' : included.length ? `Save ${included.length} transaction${included.length === 1 ? '' : 's'}` : 'Nothing to save'}
         </button>
       </div>
     </div>
