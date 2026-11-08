@@ -10,12 +10,13 @@ import {
   X,
   Trophy,
   ShieldCheck,
-  Receipt
+  Receipt,
+  LifeBuoy
 } from 'lucide-react';
 import { cn } from '../lib/utils';
 import { ProgressIndicator } from './ProgressIndicator';
 
-const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }: any) => (
+const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab, badge }: any) => (
   <div className="mb-1">
     <button
       onClick={onClick}
@@ -28,6 +29,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }
     >
       <Icon size={18} className={active ? "text-primary-ink" : "text-slate-400"} />
       <span className="flex-1 text-left">{label}</span>
+      {badge > 0 && <span className="min-w-[20px] h-5 px-1.5 rounded-full bg-primary text-white text-[11px] font-bold flex items-center justify-center">{badge}</span>}
       {subItems && <ChevronRight size={14} className={cn("transition-transform", active && "rotate-90")} />}
     </button>
     {active && subItems && (
@@ -54,7 +56,7 @@ const SidebarItem = ({ icon: Icon, label, active, onClick, subItems, activeTab }
   </div>
 );
 
-export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin }: { activeTab: string, setActiveTab: (t: string) => void, onClose?: () => void, userProfile?: any, isAdmin?: boolean }) => {
+export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin, supportCount = 0 }: { activeTab: string, setActiveTab: (t: string) => void, onClose?: () => void, userProfile?: any, isAdmin?: boolean, supportCount?: number }) => {
   return (
     <aside className="w-full h-full border-r border-slate-200 bg-white flex flex-col">
       <div className="p-6 flex items-center justify-between border-b border-slate-100">
@@ -144,6 +146,14 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin
               onClick={() => setActiveTab('admin')} 
               activeTab={activeTab}
             />
+            <SidebarItem 
+              icon={LifeBuoy} 
+              label="Support" 
+              active={activeTab === 'admin-support'} 
+              onClick={() => setActiveTab('admin-support')} 
+              activeTab={activeTab}
+              badge={supportCount}
+            />
           </div>
         )}
       </nav>
@@ -152,7 +162,7 @@ export const Sidebar = ({ activeTab, setActiveTab, onClose, userProfile, isAdmin
         <div className="brand-gradient rounded-2xl p-4">
           <h3 className="text-sm font-bold text-white mb-1">Need Help?</h3>
           <p className="text-xs text-white/70 mb-3">Our support team is here to assist you with any questions.</p>
-          <button className="wh-btn wh-btn--primary wh-btn--sm wh-btn--block">
+          <button onClick={() => setActiveTab('support')} className="wh-btn wh-btn--primary wh-btn--sm wh-btn--block">
             Contact Support
           </button>
         </div>

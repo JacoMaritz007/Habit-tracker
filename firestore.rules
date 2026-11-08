@@ -283,13 +283,59 @@ service cloud.firestore {
         (isOwner(request.resource.data.userId) &&
          request.resource.data.type in ['welcome', 'level_up', 'badge', 'goal_complete', 'streak'] &&
          !('sentBy' in request.resource.data)) ||
-        (isAdmin() && request.resource.data.type == 'announcement' &&
+        (isAdmin() && request.resource.data.type in ['announcement', 'support_reply'] &&
          request.resource.data.sentBy == request.auth.uid)
       );
       allow update: if isDocOwner() &&
                        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['read']) &&
                        request.resource.data.read is bool;
       allow delete: if isDocOwner() || isAdmin();
+    }
+
+    // Support tickets: a member opens one, members and admins post messages
+    // in its thread, and admins manage status (including escalation).
+    function isTicketOwner(ticketId) {
+      return isAuthenticated() &&
+        get(/databases/$(database)/documents/support_tickets/$(ticketId)).data.userId == request.auth.uid;
+    }
+    // For writes: sees a ticket created in the same batch as its first message.
+    function isTicketOwnerAfter(ticketId) {
+      return isAuthenticated() &&
+        getAfter(/databases/$(database)/documents/support_tickets/$(ticketId)).data.userId == request.auth.uid;
+    }
+
+    match /support_tickets/{ticketId} {
+      allow read: if isDocOwner() || isAdmin();
+      allow create: if isAuthenticated() &&
+        request.resource.data.keys().hasOnly(['userId', 'userEmail', 'userName', 'subject', 'category', 'status', 'createdAt', 'updatedAt', 'lastMessageBy']) &&
+        request.resource.data.userId == request.auth.uid &&
+        request.resource.data.subject is string && request.resource.data.subject.size() > 0 && request.resource.data.subject.size() <= 150 &&
+        request.resource.data.category in ['account', 'technical', 'billing', 'coaching', 'feedback', 'other'] &&
+        request.resource.data.status == 'open' &&
+        request.resource.data.lastMessageBy == 'member' &&
+        isRecent(request.resource.data.createdAt) && isRecent(request.resource.data.updatedAt);
+      // Members may close or reopen their own ticket and bump it when replying.
+      allow update: if isDocOwner() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'lastMessageBy']) &&
+        request.resource.data.status in ['open', 'closed'] &&
+        request.resource.data.lastMessageBy == 'member' &&
+        isRecent(request.resource.data.updatedAt);
+      // Admins manage status and bump the ticket when replying.
+      allow update: if isAdmin() &&
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'updatedAt', 'lastMessageBy', 'escalatedAt', 'escalatedBy']) &&
+        request.resource.data.status in ['open', 'answered', 'escalated', 'closed'] &&
+        request.resource.data.lastMessageBy in ['member', 'admin'] &&
+        isRecent(request.resource.data.updatedAt);
+
+      match /messages/{messageId} {
+        allow read: if isTicketOwner(ticketId) || isAdmin();
+        allow create: if request.resource.data.keys().hasOnly(['authorId', 'authorName', 'authorRole', 'body', 'createdAt']) &&
+          request.resource.data.authorId == request.auth.uid &&
+          request.resource.data.body is string && request.resource.data.body.size() > 0 && request.resource.data.body.size() <= 5000 &&
+          isRecent(request.resource.data.createdAt) &&
+          ((isTicketOwnerAfter(ticketId) && request.resource.data.authorRole == 'member') ||
+           (isAdmin() && request.resource.data.authorRole == 'admin'));
+      }
     }
 
     match /freedom_calculator/{calcId} {
